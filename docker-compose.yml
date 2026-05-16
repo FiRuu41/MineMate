@@ -18,7 +18,7 @@ services:
       MYSQL_USER: mcmod
       MYSQL_PASSWORD: mcmod_pwd
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
     restart: unless-stopped
