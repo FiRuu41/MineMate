@@ -1,0 +1,23 @@
+[
+  {
+    "mod_id": "create",
+    "name_zh": "机械动力",
+    "name_en": "Create",
+    "mcmod_url": "https://www.mcmod.cn/class/2261.html",
+    "mc_versions": ["1.18.2", "1.19.2", "1.20.1"]
+  },
+  {
+    "mod_id": "jei",
+    "name_zh": "JEI物品管理",
+    "name_en": "Just Enough Items",
+    "mcmod_url": "https://www.mcmod.cn/class/490.html",
+    "mc_versions": ["1.18.2", "1.19.2", "1.20.1"]
+  },
+  {
+    "mod_id": "botania",
+    "name_zh": "植物魔法",
+    "name_en": "Botania",
+    "mcmod_url": "https://www.mcmod.cn/class/213.html",
+    "mc_versions": ["1.18.2", "1.19.2", "1.20.1"]
+  }
+]
