@@ -20,13 +20,14 @@ class VectorRetriever:
         if section:
             conds.append(qm.FieldCondition(key="section", match=qm.MatchValue(value=section)))
         flt = qm.Filter(must=conds) if conds else None
-        hits = self.client.search(
+        resp = self.client.query_points(
             collection_name=self.collection,
-            query_vector=vec,
+            query=vec,
             limit=top_k,
             query_filter=flt,
             with_payload=True,
         )
+        hits = resp.points
         results: list[Chunk] = []
         for h in hits:
             payload = h.payload or {}
