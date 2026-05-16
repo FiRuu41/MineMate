@@ -1,8 +1,8 @@
 [
   {
-    "mod_id": "create",
-    "name_zh": "机械动力",
-    "name_en": "Create",
+    "mod_id": "litematica",
+    "name_zh": "投影",
+    "name_en": "Litematica",
     "mcmod_url": "https://www.mcmod.cn/class/2261.html",
     "mc_versions": ["1.18.2", "1.19.2", "1.20.1"]
   },

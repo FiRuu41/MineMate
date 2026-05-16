@@ -32,6 +32,7 @@ class McmodWorkflow:
         if not mod_name:
             return None
         mapping = {
+            "投影": "litematica", "Litematica": "litematica",
             "机械动力": "create", "Create": "create",
             "JEI": "jei", "JEI物品管理": "jei",
             "植物魔法": "botania", "Botania": "botania",

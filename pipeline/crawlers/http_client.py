@@ -40,11 +40,10 @@ class HttpClient:
         if not m:
             return None
         token = m.group(1)
-        host = httpx.URL(url).host or ""
-        self._client.cookies.set("yxd_token", token, domain=host)
         logger.info("mcmod bootstrap detected, injected yxd_token, refetching {}", url)
         self._sleep()
-        r = self._client.get(url, headers=self._headers())
+        headers = {**self._headers(), "Cookie": f"yxd_token={token}", "Referer": url}
+        r = self._client.get(url, headers=headers)
         r.raise_for_status()
         return r.text
 
