@@ -1,4 +1,6 @@
-# mc-mod-qa
+# MineMate
+
+> Your AI buddy for Minecraft mods.
 
 基于 mcmod.cn 的 Minecraft 模组智能体问答系统。
 
@@ -24,7 +26,7 @@
 
 ```bash
 git clone <repo>
-cd mc-mod-qa
+cd minemate
 cp .env.example .env           # 填入 DEEPSEEK_API_KEY
 uv sync                        # 安装依赖
 docker-compose up -d           # 启动 Qdrant + MySQL
@@ -50,7 +52,7 @@ uv run pytest -m e2e          # 端到端，需要 Qdrant + 索引 + DeepSeek ke
 详见 `docs/superpowers/specs/2026-05-16-mc-mod-qa-design.md` § 9。
 
 ```
-mc-mod-qa/
+MineMate/
 ├── config/         # pydantic-settings + loguru + prompts
 ├── kb/             # 领域模型 + 向量检索
 ├── pipeline/       # 离线数据管线（爬取、清洗、切分、入库）
