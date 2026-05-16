@@ -44,8 +44,9 @@ select = ["E", "F", "I", "UP", "B"]
 pythonpath = ["."]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-addopts = "-m 'not e2e and not slow'"
+addopts = "-m 'not e2e and not slow and not integration'"
 markers = [
   "e2e: end-to-end tests requiring docker + DeepSeek key",
   "slow: tests that download models or take a long time",
+  "integration: tests that require external services like Qdrant or MySQL",
 ]
