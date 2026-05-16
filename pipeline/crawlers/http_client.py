@@ -1,4 +1,5 @@
 import random
+import re
 import time
 
 import httpx
@@ -9,6 +10,10 @@ UAS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.4 Safari/605.1.15",
 ]
+
+# mcmod.cn anti-scrape: first response is a JS snippet that sets a cookie and
+# reloads the page. Detect, parse the token, inject the cookie, then retry once.
+YXD_TOKEN_RE = re.compile(r"yxd_token\s*=\s*['\"]?([a-fA-F0-9]+)")
 
 
 class HttpClient:
@@ -24,6 +29,25 @@ class HttpClient:
         if self.delay_seconds > 0:
             time.sleep(self.delay_seconds + random.random() * 0.5)
 
+    def _maybe_handle_mcmod_bootstrap(self, url: str, text: str) -> str | None:
+        """If response is the mcmod anti-scrape bootstrap, inject cookie and refetch.
+
+        Returns refetched body on bootstrap path; None otherwise.
+        """
+        if "yxd_token" not in text or len(text) > 2000:
+            return None
+        m = YXD_TOKEN_RE.search(text)
+        if not m:
+            return None
+        token = m.group(1)
+        host = httpx.URL(url).host or ""
+        self._client.cookies.set("yxd_token", token, domain=host)
+        logger.info("mcmod bootstrap detected, injected yxd_token, refetching {}", url)
+        self._sleep()
+        r = self._client.get(url, headers=self._headers())
+        r.raise_for_status()
+        return r.text
+
     def get(self, url: str) -> str:
         @retry(
             reraise=True,
@@ -36,7 +60,8 @@ class HttpClient:
             r = self._client.get(url, headers=self._headers())
             r.raise_for_status()
             logger.debug("GET {} -> {}", url, r.status_code)
-            return r.text
+            real = self._maybe_handle_mcmod_bootstrap(url, r.text)
+            return real if real is not None else r.text
 
         return _do()
 

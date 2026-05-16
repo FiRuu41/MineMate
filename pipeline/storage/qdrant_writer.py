@@ -35,6 +35,8 @@ class QdrantWriter:
             self.client.delete_collection(self.collection)
 
     def delete_by_mod_id(self, mod_id: str) -> None:
+        if not self.client.collection_exists(self.collection):
+            return
         self.client.delete(
             collection_name=self.collection,
             points_selector=qm.FilterSelector(
