@@ -1,3 +1,9 @@
+import os
+
+# MUST come before any import that loads huggingface_hub (e.g. gradio).
+# huggingface_hub caches HF_ENDPOINT at import time, so setting it later is too late.
+os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+
 import asyncio
 
 import gradio as gr
