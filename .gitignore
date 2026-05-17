@@ -15,3 +15,5 @@ data/*.db
 models/
 docs/
 CLAUDE.md
+data/qdrant_export/
+data/export/
