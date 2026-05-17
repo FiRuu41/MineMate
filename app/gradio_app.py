@@ -36,9 +36,7 @@ def main() -> None:
     handler = build_handler()
 
     async def respond(message: str, history: list):
-        """Called by gr.ChatInterface on each user message."""
         answer, debug = await handler.chat(message)
-        # Append assistant response to history for chatbot display
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": answer})
         return "", history, debug
@@ -47,17 +45,15 @@ def main() -> None:
         handler.clear()
         return [], "", ""
 
-    with gr.Blocks(css=CSS, title="MineMate") as demo:
+    with gr.Blocks(title="MineMate") as demo:
         gr.Markdown("# MineMate — MC 模组智能问答")
 
         with gr.Row():
             with gr.Column(scale=3):
                 chatbot = gr.Chatbot(
                     label="对话",
-                    bubble_full_width=False,
                     height=550,
-                    show_copy_button=True,
-                    avatar_images=(None, None),
+                    type="messages",
                 )
                 with gr.Row():
                     msg = gr.Textbox(
@@ -89,7 +85,7 @@ def main() -> None:
             outputs=[chatbot, msg, debug_out],
         )
 
-    demo.launch(server_name="127.0.0.1", server_port=7860)
+    demo.launch(server_name="127.0.0.1", server_port=7860, css=CSS)
 
 
 if __name__ == "__main__":
