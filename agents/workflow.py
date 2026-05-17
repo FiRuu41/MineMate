@@ -145,7 +145,7 @@ class McmodWorkflow:
                             page_url = m.mcmod_url or ""
                         except NameError:
                             page_url = ""
-                    fake_md = ChunkMetadata(mod_id=mod_id or "web", mod_name_zh="在线获取", section="web",
+                    fake_md = ChunkMetadata(mod_id=mod_id or "web", mod_name_zh="在线获取", section="intro",
                                              source_url=page_url or "https://www.mcmod.cn", title="在线获取")
                     chunks = [Chunk(text=web_context[:3000], metadata=fake_md, score=1.0)]
                     answer = self.answerer.answer(original_query, chunks, {"web_results": [{"url": url}]})
