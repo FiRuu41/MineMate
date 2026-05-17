@@ -66,6 +66,24 @@ class McmodWorkflow:
             tool_results["web_results"] = web_search_mcmod(query, top_k=5)
             answer = self.answerer.answer(query, chunks, tool_results)
 
+        elif intent == "latest_mods":
+            from tools.find_latest_mods import find_latest_mods
+            tags = entities.get("tags", [])
+            mc_ver = entities.get("mc_version")
+            tool_results["latest_mods"] = find_latest_mods(tags=tags or None, mc_version=mc_ver, top_k=10)
+            answer = self.answerer.answer(query, chunks, tool_results)
+
+        elif intent == "modpack_curation":
+            from tools.curate_modpack import curate_modpack
+            tags = entities.get("tags", [])
+            mc_ver = entities.get("mc_version")
+            pref = entities.get("preference", "")
+            loader = entities.get("loader")
+            tool_results["modpack"] = curate_modpack(
+                themes=tags, mc_version=mc_ver, loader=loader, preference=pref, max_mods=15,
+            )
+            answer = self.answerer.answer(query, chunks, tool_results)
+
         elif intent == "recommendation":
             from tools.recommend_mods import recommend_mods
             tags = entities.get("tags", [])

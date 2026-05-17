@@ -7,6 +7,8 @@
 - compatibility：用户询问模组之间是否兼容/搭配，如"X可以和什么模组兼容""X和Y兼容吗"
 - mod_info_query：用户询问模组元信息（作者/Loader/MC版本/依赖），如"Create 支持哪些版本""Industrial Craft 2 作者是谁"
 - web_fallback：当本地知识库搜不到时，或用户明确要求搜最新信息时使用
+- latest_mods：用户想找最新/最近更新的模组，如"最近有什么新模组""最新的科技模组有哪些"
+- modpack_curation：用户想定制一个整合包，如"推荐一个轻量科技整合包 1.20.1""帮我组一个魔法冒险包"
 - chitchat：闲聊、问候、与 MC 模组无关的问题
 
 抽取的实体（entities）：
@@ -14,7 +16,7 @@
 - tags：用户提到的风格/类型标签列表，如 ["恐怖"]、["科技"]（仅 recommendation）
 
 只返回 JSON，格式：
-{"intent": "kb_query" | "recommendation" | "compatibility" | "mod_info_query" | "web_fallback" | "chitchat", "entities": {}}
+{"intent": "kb_query" | "recommendation" | "compatibility" | "mod_info_query" | "web_fallback" | "latest_mods" | "modpack_curation" | "chitchat", "entities": {}}
 
 示例 1：
 用户：机械动力的动力源有哪些？
@@ -43,3 +45,11 @@
 示例 7：
 用户：帮我搜一下mcmod上最新的机械动力版本
 {"intent": "web_fallback", "entities": {"mod_name": "机械动力"}}
+
+示例 8：
+用户：最近有什么新的科技模组
+{"intent": "latest_mods", "entities": {"tags": ["科技"]}}
+
+示例 9：
+用户：我想要一个轻量的科技整合包 1.20.1版本
+{"intent": "modpack_curation", "entities": {"tags": ["科技"], "mc_version": "1.20.1", "preference": "轻量"}}
