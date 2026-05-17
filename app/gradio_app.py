@@ -123,14 +123,14 @@ def main() -> None:
 
     async def respond(message: str, history: list, conv_id: str):
         if not message.strip():
-            return "", history, "", conv_id
+            return "", history, "", "", conv_id
         answer, debug = await handler.chat(message)
+        status = handler._last_status
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": answer})
         title = history[0]["content"][:40] if history else "新对话"
         _save_conv(conv_id, history, title)
-        # Update sidebar after save
-        return "", history, debug, conv_id, _build_radio()
+        return "", history, debug, status, conv_id, _build_radio()
 
     STEVE_AVATAR = "https://minotar.net/helm/Steve/64.png"
     BOT_AVATAR = "https://minotar.net/helm/GrassBlock/64.png"
@@ -139,14 +139,14 @@ def main() -> None:
         handler.clear()
         cid = str(int(time.time() * 1000))
         _save_conv(cid, [], "新对话")
-        return [], "", "", cid, _build_radio()
+        return [], "", "", "", cid, _build_radio()
 
     def delete_chat(conv_id: str):
         _delete_conv(conv_id)
         handler.clear()
         new_id = str(int(time.time() * 1000))
         _save_conv(new_id, [], "新对话")
-        return [], "", "", new_id, _build_radio()
+        return [], "", "", "", new_id, _build_radio()
 
     def load_chat(cid: str):
         msgs = _load_conv(cid)
@@ -196,6 +196,7 @@ def main() -> None:
 
             # Main chat
             with gr.Column(scale=4, elem_id="chat-col"):
+                status_bar = gr.Markdown("", elem_id="status-bar")
                 chatbot = gr.Chatbot(
                     elem_id="chatbot", label="", layout="bubble",
                     buttons=["copy"], avatar_images=(STEVE_AVATAR, BOT_AVATAR),
@@ -221,10 +222,14 @@ def main() -> None:
             return asyncio.run(respond(m, h, cid))
 
         send.click(_sync_respond, inputs=[msg, chatbot, conv_id],
-                   outputs=[msg, chatbot, debug_out, conv_id, radio]).then(lambda: "", None, [msg])
+                   outputs=[msg, chatbot, debug_out, status_bar, conv_id, radio]).then(lambda: "", None, [msg])
         msg.submit(_sync_respond, inputs=[msg, chatbot, conv_id],
-                   outputs=[msg, chatbot, debug_out, conv_id, radio]).then(lambda: "", None, [msg])
+                   outputs=[msg, chatbot, debug_out, status_bar, conv_id, radio]).then(lambda: "", None, [msg])
         new_btn.click(new_chat, outputs=[chatbot, msg, debug_out, conv_id, radio])
+        del_btn.click(
+            lambda cid: delete_chat(cid), inputs=[conv_id],
+            outputs=[chatbot, msg, debug_out, conv_id, radio]
+        ).then(lambda: ("", "", "", _build_radio()), outputs=[status_bar, debug_out, chatbot, radio])
         del_btn.click(
             lambda cid: delete_chat(cid), inputs=[conv_id],
             outputs=[chatbot, msg, debug_out, conv_id, radio]

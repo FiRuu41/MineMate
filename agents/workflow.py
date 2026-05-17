@@ -3,6 +3,52 @@ from kb.schemas import Chunk
 from config.settings import settings
 
 
+import random
+
+STATUS_MSGS = {
+    "routing": [
+        "🤔 正在理解你的问题...",
+        "🔍 分析问题中...",
+        "💭 思考中...",
+    ],
+    "retrieving": [
+        "📚 正在翻书中...",
+        "🔎 搜索模组百科中...",
+        "📖 翻阅知识库...",
+        "🏗️ 挖掘信息中...",
+        "⛏️ 正在开采数据...",
+    ],
+    "answering": [
+        "✍️ 正在整理回答...",
+        "📝 撰写回复中...",
+        "💡 组织信息中...",
+    ],
+    "web_fallback": [
+        "🌐 正在查询网页，请稍后...",
+        "🕸️ 联网搜索中...",
+        "🌍 翻阅在线百科...",
+    ],
+    "recommend": [
+        "🎯 正在搜索模组...",
+        "🔮 寻找匹配的模组...",
+        "🧭 探索模组世界...",
+    ],
+    "compat": [
+        "🔗 检查兼容性中...",
+        "🔄 分析模组关系...",
+    ],
+    "modpack": [
+        "📦 正在编排整合包...",
+        "🎒 打包模组中...",
+        "🗂️ 整理模组列表...",
+    ],
+    "info": [
+        "📋 查询模组信息...",
+        "🔎 查找资料中...",
+    ],
+}
+
+
 class McmodWorkflow:
     """MVP workflow with multi-turn memory support and critic retry loop."""
 
@@ -15,7 +61,11 @@ class McmodWorkflow:
             critic = CriticAgent()
         self.critic = critic
 
+    def _status(self, key: str) -> str:
+        return random.choice(STATUS_MSGS.get(key, ["⏳ 处理中..."]))
+
     async def run(self, *, query: str, chat_history: str = "", exclude_ids: list[str] | None = None) -> dict:
+        status = self._status("routing")
         routing = self.router.route(query, chat_history=chat_history)
         intent = routing["intent"]
         entities = routing["entities"]
@@ -26,6 +76,7 @@ class McmodWorkflow:
         original_query = query
 
         if intent == "kb_query":
+            status = self._status("retrieving")
             mod_id = self._entity_to_mod_id(entities.get("mod_name"))
             chunks = self.retriever.retrieve(query, top_k=settings.top_k, mod_id=mod_id)
 
@@ -53,6 +104,7 @@ class McmodWorkflow:
 
             # Auto web fallback: if answer says "not found", try real-time search
             if "未在知识库" in answer or "未找到" in answer:
+                status = self._status("web_fallback")
                 from tools.web_search_mcmod import web_search_mcmod
                 logger.info("kb_query not found, trying web fallback")
                 web_results = web_search_mcmod(original_query, top_k=2, fetch_pages=True)
@@ -71,6 +123,7 @@ class McmodWorkflow:
                         answer = self.answerer.answer(original_query, chunks, {"web_results": web_results})
 
         elif intent == "mod_info_query":
+            status = self._status("info")
             from tools.get_mod_info import get_mod_info
             mod_name = entities.get("mod_name")
             mod_id = self._entity_to_mod_id(mod_name)
@@ -93,6 +146,7 @@ class McmodWorkflow:
             answer = self.answerer.answer(query, chunks, tool_results)
 
         elif intent == "modpack_curation":
+            status = self._status("modpack")
             from tools.curate_modpack import curate_modpack
             tags = entities.get("tags", [])
             mc_ver = entities.get("mc_version")
@@ -104,11 +158,13 @@ class McmodWorkflow:
             answer = self.answerer.answer(query, chunks, tool_results)
 
         elif intent == "recommendation":
+            status = self._status("recommend")
             from tools.recommend_mods import recommend_mods
             tags = entities.get("tags", [])
             tool_results["recommendations"] = recommend_mods(tags=tags, top_k=15, exclude_ids=exclude_ids)
             answer = self.answerer.answer(query, chunks, tool_results)
         elif intent == "compatibility":
+            status = self._status("compat")
             from tools.compatibility import get_compatible_mods
             mod_name = entities.get("mod_name")
             mod_id = self._entity_to_mod_id(mod_name)
@@ -120,9 +176,11 @@ class McmodWorkflow:
         else:
             answer = self.answerer.answer(query, chunks, tool_results)
 
+        # Done — show answering status
+        status = self._status("answering")
         return {
             "intent": intent, "answer": answer, "chunks": chunks,
-            "tool_results": tool_results, "retry_count": retry_count,
+            "tool_results": tool_results, "retry_count": retry_count, "status": status,
         }
 
     @staticmethod

@@ -53,12 +53,34 @@
     },
     {
       "role": "user",
-      "content": "暮色森林（The Twilight Forest）中，下列哪个 BOSS 会掉落“炽热的泪”？"
+      "metadata": null,
+      "content": [
+        {
+          "text": "暮色森林（The Twilight Forest）中，下列哪个 BOSS 会掉落“炽热的泪”？",
+          "type": "text"
+        }
+      ],
+      "options": null
     },
     {
       "role": "assistant",
-      "content": "未在知识库中找到相关信息。"
+      "metadata": null,
+      "content": [
+        {
+          "text": "未在知识库中找到相关信息。",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "user",
+      "content": "你好"
+    },
+    {
+      "role": "assistant",
+      "content": "你好！很高兴为你服务。欢迎向我提问 Minecraft 模组相关的问题，我会根据知识库尽力为你解答。如果暂时没有相关信息，我也会如实告知。有什么需要帮助的吗？"
     }
   ],
-  "updated": 1779031827.8832226
+  "updated": 1779032052.146053
 }

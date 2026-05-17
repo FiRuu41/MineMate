@@ -10,6 +10,7 @@ class ChatHandler:
         self.workflow = workflow
         self.memory = ConversationMemory()
         self._shown_ids: set[str] = set()
+        self._last_status = ""
 
     async def chat(self, message: str) -> tuple[str, str]:
         new_trace_id()
@@ -19,8 +20,8 @@ class ChatHandler:
         result = await self.workflow.run(
             query=message, chat_history=history, exclude_ids=list(self._shown_ids),
         )
+        self._last_status = result.get("status", "✅ 完成")
         self.memory.add_assistant(result["answer"])
-        # Track recommended mod IDs for pagination
         recs = result.get("tool_results", {}).get("recommendations", [])
         for r in recs:
             if isinstance(r, dict) and "mod_id" in r:
