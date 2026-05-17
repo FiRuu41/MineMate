@@ -108,7 +108,15 @@ class McmodWorkflow:
                 status = self._status("web_fallback")
                 from tools.web_search_mcmod import web_search_mcmod
                 logger.info("kb_query not found, trying web fallback")
-                web_results = web_search_mcmod(original_query, top_k=2, fetch_pages=True)
+                # Build a short keyword search query (not the full question)
+                mod_name = entities.get("mod_name", "")
+                if isinstance(mod_name, list):
+                    mod_name = mod_name[0] if mod_name else ""
+                # Extract key terms: mod name + first 30 chars of question
+                short_q = (mod_name + " " + original_query[:30]).strip() if mod_name else original_query[:40]
+                logger.info("web search query: {}", short_q)
+                web_results = web_search_mcmod(short_q, top_k=2, fetch_pages=True)
+                logger.info("web search got {} results", len(web_results))
                 if web_results and "error" not in web_results[0]:
                     tool_results["web_results"] = web_results
                     # Build context from web results
@@ -116,6 +124,7 @@ class McmodWorkflow:
                         r.get("page_content", r.get("snippet", ""))
                         for r in web_results if "error" not in r
                     )
+                    logger.info("web context: {} chars", len(web_context))
                     if web_context:
                         from kb.schemas import Chunk, ChunkMetadata
                         fake_md = ChunkMetadata(mod_id="web", mod_name_zh="实时搜索", section="web",
