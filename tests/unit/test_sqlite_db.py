@@ -2,6 +2,7 @@ from pipeline.storage.db import Base, SessionLocal, engine
 
 
 def test_sqlite_creates_tables():
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     from pipeline.storage.models import Mod
     with SessionLocal() as s:
@@ -14,6 +15,7 @@ def test_sqlite_creates_tables():
 def test_sqlite_json_column():
     """SQLite stores JSON as text, SQLAlchemy auto-serializes."""
     from pipeline.storage.models import Mod
+    Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     with SessionLocal() as s:
         m = Mod(mod_id="t2", name_zh="x2", mcmod_url="x",

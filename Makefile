@@ -1,10 +1,4 @@
-.PHONY: up down init build-index run test lint format tag extract-integrations
-
-up:
-	docker-compose up -d
-
-down:
-	docker-compose down
+.PHONY: init build-index build-tags run test lint format tag extract-integrations up down
 
 init:
 	uv run python -m scripts.init_db
@@ -12,8 +6,11 @@ init:
 build-index:
 	uv run python -m pipeline.build_index
 
+build-tags:
+	uv run python -m pipeline.tag_mods --workers 10
+
 run:
-	uv run python -m app.gradio_app
+	uv run minemate start
 
 test:
 	uv run pytest -v
@@ -29,3 +26,9 @@ tag:
 
 extract-integrations:
 	uv run python -m pipeline.extract_integrations
+
+up:
+	docker-compose up -d
+
+down:
+	docker-compose down

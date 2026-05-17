@@ -27,33 +27,9 @@ def setup():
 
     import subprocess
 
-    # 1. Check Docker
-    click.echo("[1/5] Checking Docker ... ", nl=False)
-    try:
-        r = subprocess.run(["docker", "ps"], capture_output=True, text=True, timeout=10)
-        if r.returncode == 0:
-            click.echo(click.style("OK", fg="green"))
-        else:
-            click.echo(click.style("FAIL", fg="red"))
-            click.echo("  Docker is not running. Please start Docker Desktop first.")
-            sys.exit(1)
-    except FileNotFoundError:
-        click.echo(click.style("NOT FOUND", fg="red"))
-        click.echo("  Docker is not installed. Install from https://www.docker.com/")
-        sys.exit(1)
-
-    # 2. Start services
-    click.echo("[2/5] Starting Qdrant + MySQL ... ", nl=False)
-    r = subprocess.run(["docker-compose", "up", "-d"], capture_output=True, text=True)
-    if r.returncode == 0:
-        click.echo(click.style("OK", fg="green"))
-    else:
-        click.echo(click.style("FAIL", fg="red"))
-        click.echo(f"  {r.stderr}")
-        sys.exit(1)
-
-    # 3. Check API key
-    click.echo("[3/5] Checking DeepSeek API key ... ", nl=False)
+    from config.settings import settings as _s
+    # 1. Check API key
+    click.echo("[1/2] Checking DeepSeek API key ... ", nl=False)
     try:
         from config.settings import settings
         key = settings.deepseek_api_key
@@ -66,8 +42,8 @@ def setup():
         click.echo(click.style("MISSING", fg="yellow"))
         click.echo(f"  Copy .env.example to .env and fill in DEEPSEEK_API_KEY")
 
-    # 4. Init DB
-    click.echo("[4/5] Initializing database ... ", nl=False)
+    # 2. Init DB
+    click.echo("[2/2] Initializing database (SQLite) ... ", nl=False)
     r = subprocess.run([sys.executable, "-m", "scripts.init_db"], capture_output=True, text=True)
     if r.returncode == 0:
         click.echo(click.style("OK", fg="green"))
@@ -75,8 +51,7 @@ def setup():
         click.echo(click.style("FAIL", fg="red"))
         click.echo(f"  {r.stderr}")
 
-    # 5. Data import guide
-    click.echo("[5/5] Data import")
+    click.echo()
     click.echo("  MineMate does NOT include mod data. You need to provide it.")
     click.echo("  Import mod data into MySQL table 'mods' with columns:")
     click.echo("    mod_id, name_zh, name_en, mcmod_url, loader, mc_versions, author, description")
