@@ -51,6 +51,25 @@ class McmodWorkflow:
             if not review.get("pass"):
                 answer = "⚠️ 此回答未通过自动校验，仅供参考\n\n" + answer
 
+            # Auto web fallback: if answer says "not found", try real-time search
+            if "未在知识库" in answer or "未找到" in answer:
+                from tools.web_search_mcmod import web_search_mcmod
+                logger.info("kb_query not found, trying web fallback")
+                web_results = web_search_mcmod(original_query, top_k=2, fetch_pages=True)
+                if web_results and "error" not in web_results[0]:
+                    tool_results["web_results"] = web_results
+                    # Build context from web results
+                    web_context = "\n\n".join(
+                        r.get("page_content", r.get("snippet", ""))
+                        for r in web_results if "error" not in r
+                    )
+                    if web_context:
+                        from kb.schemas import Chunk, ChunkMetadata
+                        fake_md = ChunkMetadata(mod_id="web", mod_name_zh="实时搜索", section="web",
+                                                 source_url=web_results[0].get("url", ""), title="实时搜索结果")
+                        chunks = [Chunk(text=web_context[:3000], metadata=fake_md, score=1.0)]
+                        answer = self.answerer.answer(original_query, chunks, {"web_results": web_results})
+
         elif intent == "mod_info_query":
             from tools.get_mod_info import get_mod_info
             mod_name = entities.get("mod_name")

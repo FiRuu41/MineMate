@@ -1,0 +1,64 @@
+{
+  "id": "1779031769974",
+  "title": [
+    {
+      "text": "在匠魂（Tinkers’ Construct）模组中，下列哪种材料制作的部件自带“自动修复”属性？",
+      "type": "text"
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "metadata": null,
+      "content": [
+        {
+          "text": "在匠魂（Tinkers’ Construct）模组中，下列哪种材料制作的部件自带“自动修复”属性？",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "assistant",
+      "metadata": null,
+      "content": [
+        {
+          "text": "未在知识库中找到相关信息。",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "user",
+      "metadata": null,
+      "content": [
+        {
+          "text": "在匠魂（Tinkers’ Construct）模组中，下列哪种材料制作的部件自带“自动修复”属性？\nA. 玛玉灵\nB. 钴\nC. 许多锭\nD. 绿宝金",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "assistant",
+      "metadata": null,
+      "content": [
+        {
+          "text": "未在知识库中找到相关信息。",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "user",
+      "content": "暮色森林（The Twilight Forest）中，下列哪个 BOSS 会掉落“炽热的泪”？"
+    },
+    {
+      "role": "assistant",
+      "content": "未在知识库中找到相关信息。"
+    }
+  ],
+  "updated": 1779031827.8832226
+}
