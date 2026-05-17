@@ -22,12 +22,15 @@ async def test_workflow_kb_query():
     fake_retriever.retrieve.return_value = [_chunk("机械动力是工程模组")]
     fake_answerer = MagicMock()
     fake_answerer.answer.return_value = "机械动力是工程模组 [来源1]"
+    fake_critic = MagicMock()
+    fake_critic.review.return_value = {"pass": True, "reason": "good", "suggestion": ""}
 
-    wf = McmodWorkflow(router=fake_router, retriever=fake_retriever, answerer=fake_answerer)
+    wf = McmodWorkflow(router=fake_router, retriever=fake_retriever, answerer=fake_answerer, critic=fake_critic)
     result = await wf.run(query="什么是机械动力")
     assert "[来源1]" in result["answer"]
     assert result["intent"] == "kb_query"
     assert len(result["chunks"]) == 1
+    assert result["retry_count"] == 0
 
 
 @pytest.mark.asyncio
