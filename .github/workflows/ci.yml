@@ -1,22 +1,22 @@
 name: CI
 on: [push, pull_request]
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: uv sync
       - name: Lint
-        run: ruff check .
-      - name: Test
+        run: uv run ruff check .
+      - name: Test (unit only)
         env:
           DEEPSEEK_API_KEY: sk-test
           MYSQL_HOST: 127.0.0.1
           MYSQL_USER: test
           MYSQL_PASSWORD: test
           MYSQL_DB: test
-        run: pytest -v
+        run: uv run pytest -v -m "not slow and not e2e and not integration"
