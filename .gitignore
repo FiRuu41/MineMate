@@ -13,3 +13,4 @@ data/*.db
 .idea/
 .vscode/
 models/
+docs/
