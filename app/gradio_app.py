@@ -53,7 +53,9 @@ def main() -> None:
                 chatbot = gr.Chatbot(
                     label="对话",
                     height=550,
-                    type="messages",
+                    layout="bubble",
+                    buttons=["copy"],
+                    avatar_images=(None, None),
                 )
                 with gr.Row():
                     msg = gr.Textbox(
