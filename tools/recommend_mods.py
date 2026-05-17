@@ -37,18 +37,25 @@ def recommend_mods_with_session(session, *, tags: list[str], mc_version: str | N
         logger.exception("MySQL JSON_TABLE failed, trying in-memory fallback")
         rows = _fallback_search(session, tags, mc_version, loader, top_k)
 
-    return [
-        {
+    result = []
+    for r in rows:
+        tags_val = r.tags
+        if isinstance(tags_val, str):
+            import json
+            try:
+                tags_val = json.loads(tags_val)
+            except (json.JSONDecodeError, TypeError):
+                tags_val = {}
+        result.append({
             "mod_id": r.mod_id,
             "name_zh": r.name_zh,
             "name_en": r.name_en,
             "mcmod_url": r.mcmod_url,
-            "tags": r.tags,
+            "tags": tags_val or {},
             "description": (r.description or "")[:200],
             "match_score": r.score if hasattr(r, "score") else 1,
-        }
-        for r in rows
-    ]
+        })
+    return result
 
 
 def _fallback_search(session, tags, mc_version, loader, top_k):
