@@ -1,5 +1,12 @@
 """MineMate CLI — MC mod Q&A agent launcher."""
+import os
 import sys
+
+# Ensure project root is on path (needed when run via installed entry point)
+_project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
 import click
 
 
