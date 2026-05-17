@@ -107,7 +107,10 @@ class McmodWorkflow:
         }
 
     @staticmethod
-    def _entity_to_mod_id(mod_name: str | None) -> str | None:
+    def _entity_to_mod_id(mod_name) -> str | None:
+        # Router may return a list for multi-mod queries
+        if isinstance(mod_name, list):
+            mod_name = mod_name[0] if mod_name else None
         if not mod_name:
             return None
         mapping = {
