@@ -2,10 +2,11 @@
 import os
 import sys
 
-# Ensure project root is on path (needed when run via installed entry point)
-_project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _project_root not in sys.path:
-    sys.path.insert(0, _project_root)
+# Ensure project root is on path (needed when run via installed entry point).
+# The user always runs from the project root directory.
+_cwd = os.getcwd()
+if _cwd not in sys.path:
+    sys.path.insert(0, _cwd)
 
 import click
 
