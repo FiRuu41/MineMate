@@ -1,7 +1,7 @@
-"""Real-time mcmod search + page fetch via proxy pool.
+"""Real-time mcmod search + page fetch.
 
-When local KB misses, this tool searches mcmod.cn, fetches the top result page,
-and extracts the mod introduction for the LLM to use.
+Tries direct connection first. Falls back to proxy pool if configured.
+Most users don't need a proxy.
 """
 import re
 import time
@@ -11,14 +11,39 @@ from bs4 import BeautifulSoup
 from loguru import logger
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0"
-PROXY_URL = "http://t17900430677647:974tonyg@k773.kdltps.com:15818"
 TOKEN_RE = re.compile(r"yxd_token['\"]?\s*[=:']\s*['\"]?([a-f0-9]+)", re.I)
 
+# KDL private proxy API (optional — only used if direct fails)
+PROXY_API = ("https://dps.kdlapi.com/api/getdps/"
+             "?secret_id=oaoslyfdfto82bsa6ks0"
+             "&signature=wjjgi4ikqjol7fwwglml7y76ttpvq0v8"
+             "&num=3&format=json&sep=1")
+PROXY_USER = "d2645551915"
+PROXY_PASS = "vby8n2ny"
+_proxy_ips: list[str] = []
 
-def _fetch(url: str) -> str | None:
-    """Fetch with cookie bypass via proxy."""
-    with httpx.Client(proxy=PROXY_URL, timeout=25, follow_redirects=False) as c:
+
+def _get_proxy() -> str | None:
+    global _proxy_ips
+    if not _proxy_ips:
         try:
+            import requests as req
+            r = req.get(PROXY_API, timeout=10)
+            _proxy_ips = r.json().get("data", {}).get("proxy_list", [])
+            logger.debug("Fetched {} proxy IPs", len(_proxy_ips))
+        except Exception as e:
+            logger.warning("Proxy API failed: {}", e)
+            return None
+    return _proxy_ips.pop() if _proxy_ips else None
+
+
+def _try_fetch(url: str, proxy: str | None = None) -> str | None:
+    """One attempt to fetch URL, with or without proxy."""
+    try:
+        client_kwargs = {"timeout": 25, "follow_redirects": False}
+        if proxy:
+            client_kwargs["proxy"] = proxy
+        with httpx.Client(**client_kwargs) as c:
             r1 = c.get(url, headers={"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9"})
             m = TOKEN_RE.search(r1.text)
             if m and len(r1.text) < 500:
@@ -29,32 +54,41 @@ def _fetch(url: str) -> str | None:
             if len(r3.text) < 500 or "yxd_token" in r3.text:
                 time.sleep(0.3)
                 r3 = c.get(url, headers={"User-Agent": UA, "Referer": "https://www.mcmod.cn/"})
-            return r3.text if len(r3.text) > 500 else None
-        except Exception as e:
-            logger.warning("fetch failed for {}: {}", url, e)
-            return None
+            if len(r3.text) < 500:
+                return None
+            return r3.text
+    except Exception as e:
+        logger.debug("fetch failed (proxy={}): {}", bool(proxy), e)
+        return None
+
+
+def _fetch(url: str) -> str | None:
+    """Fetch URL, trying direct first, then proxy."""
+    # Try direct
+    html = _try_fetch(url, proxy=None)
+    if html:
+        return html
+    # Try proxy
+    ip = _get_proxy()
+    if ip:
+        proxy_url = f"http://{PROXY_USER}:{PROXY_PASS}@{ip}"
+        logger.info("Direct failed, trying proxy {}", ip)
+        return _try_fetch(url, proxy=proxy_url)
+    return None
 
 
 def _parse_intro(html: str) -> str:
-    """Extract intro description from a mod class page."""
     soup = BeautifulSoup(html, "lxml")
-    name_zh = (soup.select_one(".class-title h3") or BeautifulSoup("", "lxml").new_tag("span")).get_text(strip=True)
-    desc_parts = [p.get_text("\n", strip=True) for p in soup.select(".common-text p") if p.get_text(strip=True)]
-    description = "\n\n".join(desc_parts)
-    return f"模组：{name_zh}\n{description[:3000]}"
+    name = (soup.select_one(".class-title h3") or soup.new_tag("span")).get_text(strip=True)
+    desc = "\n".join(p.get_text("\n", strip=True) for p in soup.select(".common-text p") if p.get_text(strip=True))
+    return f"模组：{name}\n{desc[:3000]}"
 
 
-def web_search_mcmod(query: str, top_k: int = 3, fetch_pages: bool = True) -> list[dict]:
-    """Search mcmod.cn and optionally fetch top result pages.
-
-    Returns list of dicts with url, title, snippet, and page_content (if fetched).
-    """
+def web_search_mcmod(query: str, top_k: int = 2, fetch_pages: bool = True) -> list[dict]:
     try:
-        # Step 1: search
-        search_url = f"https://search.mcmod.cn/s?key={query}"
-        html = _fetch(search_url)
+        html = _fetch(f"https://search.mcmod.cn/s?key={query}")
         if not html:
-            return [{"error": "search failed"}]
+            return [{"error": "search failed - network error or banned"}]
 
         results = []
         seen = set()
@@ -63,14 +97,12 @@ def web_search_mcmod(query: str, top_k: int = 3, fetch_pages: bool = True) -> li
             if cid in seen:
                 continue
             seen.add(cid)
-            url = f"https://www.mcmod.cn/class/{cid}.html"
-            results.append({"class_id": cid, "url": url, "snippet": f"mcmod class {cid}"})
+            results.append({"class_id": cid, "url": f"https://www.mcmod.cn/class/{cid}.html",
+                           "snippet": f"mcmod class {cid}"})
             if len(results) >= top_k:
                 break
 
-        # Step 2: fetch top result pages for detailed content
         if fetch_pages and results:
-            logger.info("web_search fetching {} pages", min(2, len(results)))
             for r in results[:2]:
                 page_html = _fetch(r["url"])
                 if page_html:
