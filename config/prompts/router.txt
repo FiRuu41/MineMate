@@ -5,6 +5,8 @@
 - kb_query：关于某个 MC 模组的知识、玩法、物品、机制等问题
 - recommendation：用户想找某类/某风格的模组，如"有没有恐怖模组""推荐几个科技模组"
 - compatibility：用户询问模组之间是否兼容/搭配，如"X可以和什么模组兼容""X和Y兼容吗"
+- mod_info_query：用户询问模组元信息（作者/Loader/MC版本/依赖），如"Create 支持哪些版本""Industrial Craft 2 作者是谁"
+- web_fallback：当本地知识库搜不到时，或用户明确要求搜最新信息时使用
 - chitchat：闲聊、问候、与 MC 模组无关的问题
 
 抽取的实体（entities）：
@@ -12,7 +14,7 @@
 - tags：用户提到的风格/类型标签列表，如 ["恐怖"]、["科技"]（仅 recommendation）
 
 只返回 JSON，格式：
-{"intent": "kb_query" | "recommendation" | "compatibility" | "chitchat", "entities": {}}
+{"intent": "kb_query" | "recommendation" | "compatibility" | "mod_info_query" | "web_fallback" | "chitchat", "entities": {}}
 
 示例 1：
 用户：机械动力的动力源有哪些？
@@ -33,3 +35,11 @@
 示例 5：
 用户：机械动力可以和什么模组兼容
 {"intent": "compatibility", "entities": {"mod_name": "机械动力"}}
+
+示例 6：
+用户：Create 支持哪些 MC 版本
+{"intent": "mod_info_query", "entities": {"mod_name": "Create"}}
+
+示例 7：
+用户：帮我搜一下mcmod上最新的机械动力版本
+{"intent": "web_fallback", "entities": {"mod_name": "机械动力"}}

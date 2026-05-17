@@ -7,6 +7,7 @@ import asyncio
 import gradio as gr
 
 from agents.answerer import AnswererAgent
+from agents.critic import CriticAgent
 from agents.router import RouterAgent
 from agents.workflow import McmodWorkflow
 from app.chat_handler import ChatHandler
@@ -19,6 +20,7 @@ def build_handler() -> ChatHandler:
         router=RouterAgent(),
         retriever=VectorRetriever(),
         answerer=AnswererAgent(),
+        critic=CriticAgent(),
     )
     return ChatHandler(workflow=workflow)
 

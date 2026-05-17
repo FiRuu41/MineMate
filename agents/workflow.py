@@ -51,6 +51,21 @@ class McmodWorkflow:
             if not review.get("pass"):
                 answer = "⚠️ 此回答未通过自动校验，仅供参考\n\n" + answer
 
+        elif intent == "mod_info_query":
+            from tools.get_mod_info import get_mod_info
+            mod_name = entities.get("mod_name")
+            mod_id = self._entity_to_mod_id(mod_name)
+            if mod_id or mod_name:
+                tool_results["mod_info"] = get_mod_info(mod_id or mod_name)
+            else:
+                tool_results["mod_info"] = {"error": "no mod name extracted"}
+            answer = self.answerer.answer(query, chunks, tool_results)
+
+        elif intent == "web_fallback":
+            from tools.web_search_mcmod import web_search_mcmod
+            tool_results["web_results"] = web_search_mcmod(query, top_k=5)
+            answer = self.answerer.answer(query, chunks, tool_results)
+
         elif intent == "recommendation":
             from tools.recommend_mods import recommend_mods
             tags = entities.get("tags", [])
