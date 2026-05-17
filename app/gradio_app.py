@@ -121,23 +121,15 @@ def main() -> None:
     setup_logging()
     handler = build_handler()
 
-    import random as _random
-    _STATUS_MSGS = [
-        "⛏️ 正在挖掘数据...", "📚 翻阅模组百科中...", "🔍 查找相关资料...",
-        "💭 思考中...", "📖 检索知识库...", "⏳ 正在整理信息...",
-        "🧭 探索模组世界...", "🕯️ 点亮知识火把..."
-    ]
-
     async def respond(message: str, history: list, conv_id: str):
         if not message.strip():
-            return "", history, "", f"💡 {_random.choice(_STATUS_MSGS)}", conv_id, _build_radio()
+            return "", history, "", conv_id, _build_radio()
         answer, debug = await handler.chat(message)
-        status = handler._last_status
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": answer})
         title = history[0]["content"][:40] if history else "新对话"
         _save_conv(conv_id, history, title)
-        return "", history, debug, status, conv_id, _build_radio()
+        return "", history, debug, conv_id, _build_radio()
 
     STEVE_AVATAR = "https://minotar.net/helm/Steve/64.png"
     BOT_AVATAR = "https://minotar.net/helm/GrassBlock/64.png"
@@ -146,14 +138,14 @@ def main() -> None:
         handler.clear()
         cid = str(int(time.time() * 1000))
         _save_conv(cid, [], "新对话")
-        return [], "", "", "", cid, _build_radio()
+        return [], "", "", cid, _build_radio()
 
     def delete_chat(conv_id: str):
         _delete_conv(conv_id)
         handler.clear()
         new_id = str(int(time.time() * 1000))
         _save_conv(new_id, [], "新对话")
-        return [], "", "", "", new_id, _build_radio()
+        return [], "", "", new_id, _build_radio()
 
     def load_chat(cid: str):
         msgs = _load_conv(cid)
@@ -203,7 +195,6 @@ def main() -> None:
 
             # Main chat
             with gr.Column(scale=4, elem_id="chat-col"):
-                status_bar = gr.Markdown("", elem_id="status-bar")
                 chatbot = gr.Chatbot(
                     elem_id="chatbot", label="", layout="bubble",
                     buttons=["copy"], avatar_images=(STEVE_AVATAR, BOT_AVATAR),
@@ -224,13 +215,13 @@ def main() -> None:
 
         # Events — respond is an async generator for live status updates
         send.click(respond, inputs=[msg, chatbot, conv_id],
-                   outputs=[msg, chatbot, debug_out, status_bar, conv_id, radio]).then(lambda: "", None, [msg])
+                   outputs=[msg, chatbot, debug_out, conv_id, radio]).then(lambda: "", None, [msg])
         msg.submit(respond, inputs=[msg, chatbot, conv_id],
-                   outputs=[msg, chatbot, debug_out, status_bar, conv_id, radio]).then(lambda: "", None, [msg])
-        new_btn.click(new_chat, outputs=[chatbot, msg, debug_out, status_bar, conv_id, radio])
+                   outputs=[msg, chatbot, debug_out, conv_id, radio]).then(lambda: "", None, [msg])
+        new_btn.click(new_chat, outputs=[chatbot, msg, debug_out, conv_id, radio])
         del_btn.click(
             lambda cid: delete_chat(cid), inputs=[conv_id],
-            outputs=[chatbot, msg, debug_out, status_bar, conv_id, radio]
+            outputs=[chatbot, msg, debug_out, conv_id, radio]
         )
         radio.select(handle_radio_select, outputs=[chatbot, msg, debug_out, conv_id])
         demo.load(_build_radio, outputs=[radio])
