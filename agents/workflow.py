@@ -226,11 +226,12 @@ class McmodWorkflow:
                 m = s.query(Mod).filter(
                     (Mod.name_zh == mod_name) | (Mod.name_en == mod_name)
                 ).first()
-                # Fall back to contains match
+                # Fall back to contains match — longer description = more likely the main mod
                 if not m:
+                    from sqlalchemy import desc, func
                     m = s.query(Mod).filter(
                         Mod.name_zh.contains(mod_name) | Mod.name_en.contains(mod_name)
-                    ).first()
+                    ).order_by(desc(func.length(Mod.description))).first()
                 if m:
                     return m.mod_id
         except Exception:
