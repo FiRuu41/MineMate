@@ -70,7 +70,7 @@ class McmodWorkflow:
             from tools.find_latest_mods import find_latest_mods
             tags = entities.get("tags", [])
             mc_ver = entities.get("mc_version")
-            tool_results["latest_mods"] = find_latest_mods(tags=tags or None, mc_version=mc_ver, top_k=10)
+            tool_results["latest_mods"] = find_latest_mods(tags=tags or None, mc_version=mc_ver, top_k=15)
             answer = self.answerer.answer(query, chunks, tool_results)
 
         elif intent == "modpack_curation":
@@ -87,7 +87,7 @@ class McmodWorkflow:
         elif intent == "recommendation":
             from tools.recommend_mods import recommend_mods
             tags = entities.get("tags", [])
-            tool_results["recommendations"] = recommend_mods(tags=tags, top_k=5)
+            tool_results["recommendations"] = recommend_mods(tags=tags, top_k=15)
             answer = self.answerer.answer(query, chunks, tool_results)
         elif intent == "compatibility":
             from tools.compatibility import get_compatible_mods
