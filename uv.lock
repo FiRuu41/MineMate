@@ -1155,9 +1155,10 @@ wheels = [
 [[package]]
 name = "minemate"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
+    { name = "click" },
     { name = "cryptography" },
     { name = "gradio" },
     { name = "httpx" },
@@ -1188,6 +1189,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.12" },
+    { name = "click", specifier = ">=8.1" },
     { name = "cryptography", specifier = ">=42.0" },
     { name = "gradio", specifier = ">=4.40" },
     { name = "httpx", specifier = ">=0.27" },
