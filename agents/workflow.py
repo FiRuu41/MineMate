@@ -213,18 +213,25 @@ class McmodWorkflow:
 
     @staticmethod
     def _entity_to_mod_id(mod_name) -> str | None:
-        # Router may return a list for multi-mod queries
         if isinstance(mod_name, list):
             mod_name = mod_name[0] if mod_name else None
         if not mod_name:
             return None
-        mapping = {
-            "投影": "litematica", "Litematica": "litematica",
-            "机械动力": "create", "Create": "create",
-            "JEI": "jei", "JEI物品管理": "jei",
-            "植物魔法": "botania", "Botania": "botania",
-        }
-        return mapping.get(mod_name)
+        # Try MySQL lookup by name_zh or name_en (handles any mod, not just hardcoded)
+        try:
+            from pipeline.storage.db import SessionLocal
+            from pipeline.storage.models import Mod
+            from sqlalchemy import or_
+            with SessionLocal() as s:
+                m = s.query(Mod).filter(
+                    or_(Mod.name_zh == mod_name, Mod.name_en == mod_name,
+                        Mod.name_zh.contains(mod_name), Mod.name_en.contains(mod_name))
+                ).first()
+                if m:
+                    return m.mod_id
+        except Exception:
+            pass
+        return None
 
     @staticmethod
     def _chunks_to_context(chunks: list[Chunk]) -> str:
