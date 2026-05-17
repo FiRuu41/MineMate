@@ -132,16 +132,25 @@ def main() -> None:
         # Update sidebar after save
         return "", history, debug, conv_id, _build_radio()
 
+    STEVE_AVATAR = "https://minotar.net/helm/Steve/64.png"
+    BOT_AVATAR = "https://minotar.net/helm/GrassBlock/64.png"
+
     def new_chat():
         handler.clear()
         cid = str(int(time.time() * 1000))
         _save_conv(cid, [], "新对话")
         return [], "", "", cid, _build_radio()
 
+    def delete_chat(conv_id: str):
+        _delete_conv(conv_id)
+        handler.clear()
+        new_id = str(int(time.time() * 1000))
+        _save_conv(new_id, [], "新对话")
+        return [], "", "", new_id, _build_radio()
+
     def load_chat(cid: str):
         msgs = _load_conv(cid)
         handler.clear()
-        # Replay messages into memory
         for m in msgs:
             if m["role"] == "user":
                 handler.memory.add_user(m["content"])
@@ -180,6 +189,7 @@ def main() -> None:
             with gr.Column(scale=1, min_width=240, elem_id="sidebar"):
                 gr.HTML('<div id="sidebar-header"><h3 style="margin:0;font-size:16px">⛏️ MineMate</h3></div>')
                 new_btn = gr.Button("＋ 新对话", variant="secondary", size="sm")
+                del_btn = gr.Button("🗑 删除当前对话", variant="stop", size="sm")
                 radio = gr.Radio(choices=[], label="历史对话", interactive=True, elem_id="sidebar-list")
                 with gr.Accordion("调试", open=False, elem_classes=["debug-box"]):
                     debug_out = gr.Textbox(label="", lines=5, interactive=False, show_label=False, container=False)
@@ -188,7 +198,7 @@ def main() -> None:
             with gr.Column(scale=4, elem_id="chat-col"):
                 chatbot = gr.Chatbot(
                     elem_id="chatbot", label="", layout="bubble",
-                    buttons=["copy"], avatar_images=(None, None),
+                    buttons=["copy"], avatar_images=(STEVE_AVATAR, BOT_AVATAR),
                     placeholder="<div style='text-align:center;padding:80px 0'>"
                                   "<p style='font-size:3em;margin:0'>⛏️</p>"
                                   "<p style='font-size:1.3em;color:#5D4E37;margin:10px 0'>MineMate</p>"
@@ -215,6 +225,10 @@ def main() -> None:
         msg.submit(_sync_respond, inputs=[msg, chatbot, conv_id],
                    outputs=[msg, chatbot, debug_out, conv_id, radio]).then(lambda: "", None, [msg])
         new_btn.click(new_chat, outputs=[chatbot, msg, debug_out, conv_id, radio])
+        del_btn.click(
+            lambda cid: delete_chat(cid), inputs=[conv_id],
+            outputs=[chatbot, msg, debug_out, conv_id, radio]
+        )
         radio.select(handle_radio_select, outputs=[chatbot, msg, debug_out, conv_id])
         demo.load(_build_radio, outputs=[radio])
 
