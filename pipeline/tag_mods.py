@@ -84,7 +84,7 @@ def main() -> None:
     new_trace_id()
 
     with SessionLocal() as session:
-        q = select(Mod).where(Mod.description.isnot(None)).where(Mod.description != "")
+        q = select(Mod).where(Mod.description.isnot(None)).where(Mod.description != "").where(Mod.tags.is_(None))
         if args.mod:
             q = q.where(Mod.mod_id == args.mod)
         mods = list(session.execute(q).scalars().all())
