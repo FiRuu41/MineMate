@@ -221,12 +221,16 @@ class McmodWorkflow:
         try:
             from pipeline.storage.db import SessionLocal
             from pipeline.storage.models import Mod
-            from sqlalchemy import or_
             with SessionLocal() as s:
+                # Try exact match first
                 m = s.query(Mod).filter(
-                    or_(Mod.name_zh == mod_name, Mod.name_en == mod_name,
-                        Mod.name_zh.contains(mod_name), Mod.name_en.contains(mod_name))
+                    (Mod.name_zh == mod_name) | (Mod.name_en == mod_name)
                 ).first()
+                # Fall back to contains match
+                if not m:
+                    m = s.query(Mod).filter(
+                        Mod.name_zh.contains(mod_name) | Mod.name_en.contains(mod_name)
+                    ).first()
                 if m:
                     return m.mod_id
         except Exception:
