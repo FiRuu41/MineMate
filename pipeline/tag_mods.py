@@ -1,5 +1,6 @@
-"""CLI: tag mods via DeepSeek based on description."""
+"""CLI: tag mods via DeepSeek — concurrent version (10 workers)."""
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from loguru import logger
 from sqlalchemy import select
@@ -52,41 +53,56 @@ def parse_tags_response(resp) -> dict:
     return tags
 
 
+def _tag_one(m: Mod) -> tuple[str, dict | None]:
+    """Tag a single mod. Returns (mod_id, tags_or_none)."""
+    if not m.description or len(m.description) < 30:
+        return (m.mod_id, None)
+    try:
+        llm = DeepSeekClient()
+        prompt = build_tag_prompt(m.name_zh, m.description)
+        resp = llm.chat_json([{"role": "user", "content": prompt}])
+        tags = parse_tags_response(resp)
+        return (m.mod_id, tags if tags else None)
+    except Exception as e:
+        logger.warning("[{}] tag failed: {}", m.mod_id, e)
+        return (m.mod_id, None)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mod", help="single mod_id")
     parser.add_argument("--limit", type=int, default=0, help="max mods to tag (0=all)")
+    parser.add_argument("--workers", type=int, default=10, help="concurrent LLM calls")
     args = parser.parse_args()
 
     setup_logging()
     new_trace_id()
-    llm = DeepSeekClient()
 
     with SessionLocal() as session:
         q = select(Mod).where(Mod.description.isnot(None)).where(Mod.description != "")
         if args.mod:
             q = q.where(Mod.mod_id == args.mod)
-        mods = session.execute(q).scalars().all()
+        mods = list(session.execute(q).scalars().all())
         if args.limit:
             mods = mods[:args.limit]
 
-    logger.info("tagging {} mods", len(mods))
+    logger.info("tagging {} mods with {} workers", len(mods), args.workers)
+
     tagged = 0
-    for m in mods:
-        if not m.description or len(m.description) < 30:
-            continue
-        try:
-            prompt = build_tag_prompt(m.name_zh, m.description)
-            resp = llm.chat_json([{"role": "user", "content": prompt}])
-            tags = parse_tags_response(resp)
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        futures = {pool.submit(_tag_one, m): m for m in mods}
+        for i, fut in enumerate(as_completed(futures)):
+            mod_id, tags = fut.result()
             if tags:
-                with SessionLocal() as s:
-                    update_mod_tags(s, m.mod_id, tags)
-                    s.commit()
-                tagged += 1
-                logger.debug("[{}] tags: {}", m.mod_id, tags)
-        except Exception as e:
-            logger.warning("[{}] tag failed: {}", m.mod_id, e)
+                try:
+                    with SessionLocal() as s:
+                        update_mod_tags(s, mod_id, tags)
+                        s.commit()
+                    tagged += 1
+                except Exception:
+                    pass
+            if (i + 1) % 100 == 0:
+                logger.info("Progress: {}/{} tagged", tagged, i + 1)
 
     logger.info("tagged {} / {} mods", tagged, len(mods))
 
