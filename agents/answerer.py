@@ -38,6 +38,34 @@ class AnswererAgent:
                     f"{c.get('evidence', '')}"
                 )
             parts.append("\n".join(lines))
+        if tool_results.get("latest_mods"):
+            latest = tool_results["latest_mods"]
+            lines = ["### 最新模组"]
+            for m in latest:
+                tags_str = ", ".join((m.get("tags") or {}).get("genres", []))
+                ver = (m.get("mc_versions") or [None])[0]
+                lines.append(f"- **{m['name_zh']}** ({m.get('name_en', '')}) — {tags_str} — MC {ver} — {m['mcmod_url']}")
+            parts.append("\n".join(lines))
+        if tool_results.get("modpack"):
+            mp = tool_results["modpack"]
+            lines = [f"### 整合包推荐 — {mp.get('theme', '')}"]
+            if mp.get("mc_version"):
+                lines.append(f"MC 版本: {mp['mc_version']}")
+            if mp.get("preference"):
+                lines.append(f"风格: {mp['preference']}")
+            for cat, mods in mp.get("categories", {}).items():
+                lines.append(f"\n**{cat}** ({len(mods)} 个)")
+                for m in mods:
+                    tags_str = ", ".join((m.get("tags") or {}).get("genres", []))
+                    ver = (m.get("mc_versions") or [None])[0]
+                    lines.append(f"- {m['name_zh']} ({m.get('name_en', '')}) — {tags_str} — MC {ver}")
+            if mp.get("compatibility_notes"):
+                lines.append("\n**兼容性提示:**")
+                for note in mp["compatibility_notes"]:
+                    lines.append(f"- {note}")
+            if mp.get("disclaimer"):
+                lines.append(f"\n> {mp['disclaimer']}")
+            parts.append("\n".join(lines))
         return "\n\n".join(parts) if parts else "（无可用资料）"
 
     def answer(self, question: str, chunks: list[Chunk], tool_results: dict | None = None) -> str:
