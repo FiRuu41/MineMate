@@ -44,8 +44,14 @@ class VectorRetriever:
 class HybridRetriever:
     """Vector search + keyword match, merged via RRF (Reciprocal Rank Fusion)."""
 
-    def __init__(self, vector_retriever: VectorRetriever | None = None) -> None:
-        self.vector = vector_retriever or VectorRetriever()
+    def __init__(self, vector_retriever=None) -> None:
+        if vector_retriever:
+            self.vector = vector_retriever
+        elif settings.use_qdrant:
+            self.vector = VectorRetriever()
+        else:
+            from kb.chroma_retriever import ChromaRetriever
+            self.vector = ChromaRetriever()
 
     def retrieve(self, query: str, top_k: int = 8, mod_id: str | None = None,
                  section: str | None = None) -> list[Chunk]:
