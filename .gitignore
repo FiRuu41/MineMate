@@ -19,3 +19,4 @@ data/qdrant_export/
 data/export/
 data/chroma/
 data/export/
+data/conversations/
