@@ -2,7 +2,7 @@
 
 ## Contributors
 
-- **FuRui** ([@FiRuu41](https://github.com/FiRuu41)) — 项目主理人
+- **FiRuu** ([@FiRuu41](https://github.com/FiRuu41)) — 项目主理人
 - **Claude Code** (Anthropic) — AI 辅助开发
 - **DeepSeek** — LLM 推理
 
