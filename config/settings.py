@@ -10,16 +10,22 @@ class Settings(BaseSettings):
     deepseek_model: str = "deepseek-chat"
 
     # MySQL
-    mysql_host: str
+    mysql_host: str = "127.0.0.1"
     mysql_port: int = 3306
-    mysql_user: str
-    mysql_password: str
-    mysql_db: str
+    mysql_user: str = "mcmod"
+    mysql_password: str = "mcmod_pwd"
+    mysql_db: str = "mcmod_qa"
 
     # Qdrant
     qdrant_host: str = "127.0.0.1"
     qdrant_port: int = 6333
     qdrant_collection: str = "mcmod_v1"
+
+    # Storage mode — default to SQLite + ChromaDB (no Docker needed)
+    use_mysql: bool = False        # True = MySQL, False = SQLite
+    use_qdrant: bool = False       # True = Qdrant, False = ChromaDB
+    sqlite_path: str = "data/minemate.db"
+    chroma_path: str = "data/chroma"
 
     # Embedding
     embedding_model: str = "BAAI/bge-m3"
