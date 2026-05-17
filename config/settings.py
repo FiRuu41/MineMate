@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     # Embedding
     embedding_model: str = "BAAI/bge-m3"
-    embedding_device: str = "cpu"
+    embedding_device: str = "auto"  # auto = CUDA if available, else CPU
 
     # Pipeline
     crawl_delay_seconds: float = 1.5
