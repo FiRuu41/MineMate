@@ -1,0 +1,42 @@
+{
+  "id": "1779024726656",
+  "title": [
+    {
+      "text": "推荐几个有趣的mod",
+      "type": "text"
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "metadata": null,
+      "content": [
+        {
+          "text": "推荐几个有趣的mod",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "assistant",
+      "metadata": null,
+      "content": [
+        {
+          "text": "抱歉，目前未在知识库中找到相关信息。我无法凭空推荐模组，建议你描述一下喜欢的游戏类型（如科技、魔法、冒险等），我可以尝试在后续更新中为你查找。",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "user",
+      "content": "有什么模组可以自动收菜种菜"
+    },
+    {
+      "role": "assistant",
+      "content": "未在知识库中找到相关信息。"
+    }
+  ],
+  "updated": 1779029690.9108636
+}

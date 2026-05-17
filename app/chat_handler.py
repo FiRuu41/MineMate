@@ -9,14 +9,22 @@ class ChatHandler:
     def __init__(self, workflow: McmodWorkflow) -> None:
         self.workflow = workflow
         self.memory = ConversationMemory()
+        self._shown_ids: set[str] = set()
 
     async def chat(self, message: str) -> tuple[str, str]:
         new_trace_id()
         logger.info("user> {}", message)
         self.memory.add_user(message)
         history = self.memory.format_for_prompt()
-        result = await self.workflow.run(query=message, chat_history=history)
+        result = await self.workflow.run(
+            query=message, chat_history=history, exclude_ids=list(self._shown_ids),
+        )
         self.memory.add_assistant(result["answer"])
+        # Track recommended mod IDs for pagination
+        recs = result.get("tool_results", {}).get("recommendations", [])
+        for r in recs:
+            if isinstance(r, dict) and "mod_id" in r:
+                self._shown_ids.add(r["mod_id"])
         debug = self._format_debug(result)
         logger.info("intent={}, chunks={}", result["intent"], len(result["chunks"]))
         return result["answer"], debug
@@ -27,6 +35,7 @@ class ChatHandler:
 
     def clear(self) -> None:
         self.memory.clear()
+        self._shown_ids.clear()
 
     @staticmethod
     def _format_debug(result: dict) -> str:

@@ -1,0 +1,64 @@
+{
+  "id": "1779029918838",
+  "title": [
+    {
+      "text": "有没有自动收割农作物的模组",
+      "type": "text"
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "metadata": null,
+      "content": [
+        {
+          "text": "有没有自动收割农作物的模组",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "assistant",
+      "metadata": null,
+      "content": [
+        {
+          "text": "未在知识库中找到相关信息。",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "user",
+      "metadata": null,
+      "content": [
+        {
+          "text": "有什么模组适合在服务器里安装",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "assistant",
+      "metadata": null,
+      "content": [
+        {
+          "text": "根据提供的资料，以下模组为辅助和优化类型，适合在服务器中安装以提升体验或性能：\n\n- **GammaJustExtremeBright** — 辅助, 优化 — [https://www.mcmod.cn/class/9646.html](https://www.mcmod.cn/class/9646.html)\n- **实体模型特性** (Entity Model Features) — 辅助, 优化 — [https://www.mcmod.cn/class/9909.html](https://www.mcmod.cn/class/9909.html)\n- **移除重载界面** (Remove Reloading Screen) — 辅助, 优化 — [https://www.mcmod.cn/class/9908.html](https://www.mcmod.cn/class/9908.html)\n- **Max Health Fixer** — 辅助, 优化 — [https://www.mcmod.cn/class/9645.html](https://www.mcmod.cn/class/9645.html)\n- **自定义合成表** (Custom Recipes) — 辅助, 优化 — [https://www.mcmod.cn/class/99.html](https://www.mcmod.cn/class/99.html)",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "user",
+      "content": "还有吗"
+    },
+    {
+      "role": "assistant",
+      "content": "根据提供的资料，推荐模组列表仅包含以下五个，未列出更多内容：\n\n- **GammaJustExtremeBright** — 辅助, 优化 — https://www.mcmod.cn/class/9646.html\n- **实体模型特性** (Entity Model Features) — 辅助, 优化 — https://www.mcmod.cn/class/9909.html\n- **移除重载界面** (Remove Reloading Screen) — 辅助, 优化 — https://www.mcmod.cn/class/9908.html\n- **Max Health Fixer** — 辅助, 优化 — https://www.mcmod.cn/class/9645.html\n- **自定义合成表** (Custom Recipes) — 辅助, 优化 — https://www.mcmod.cn/class/99.html\n\n未在知识库中找到更多推荐模组的相关信息。"
+    }
+  ],
+  "updated": 1779030155.9829319
+}

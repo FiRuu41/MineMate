@@ -15,7 +15,7 @@ class McmodWorkflow:
             critic = CriticAgent()
         self.critic = critic
 
-    async def run(self, *, query: str, chat_history: str = "") -> dict:
+    async def run(self, *, query: str, chat_history: str = "", exclude_ids: list[str] | None = None) -> dict:
         routing = self.router.route(query, chat_history=chat_history)
         intent = routing["intent"]
         entities = routing["entities"]
@@ -87,7 +87,7 @@ class McmodWorkflow:
         elif intent == "recommendation":
             from tools.recommend_mods import recommend_mods
             tags = entities.get("tags", [])
-            tool_results["recommendations"] = recommend_mods(tags=tags, top_k=15)
+            tool_results["recommendations"] = recommend_mods(tags=tags, top_k=15, exclude_ids=exclude_ids)
             answer = self.answerer.answer(query, chunks, tool_results)
         elif intent == "compatibility":
             from tools.compatibility import get_compatible_mods

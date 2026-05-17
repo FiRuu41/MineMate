@@ -129,7 +129,8 @@ def main() -> None:
         history.append({"role": "assistant", "content": answer})
         title = history[0]["content"][:40] if history else "新对话"
         _save_conv(conv_id, history, title)
-        return "", history, debug, conv_id
+        # Update sidebar after save
+        return "", history, debug, conv_id, _build_radio()
 
     def new_chat():
         handler.clear()
@@ -210,11 +211,12 @@ def main() -> None:
             return asyncio.run(respond(m, h, cid))
 
         send.click(_sync_respond, inputs=[msg, chatbot, conv_id],
-                   outputs=[msg, chatbot, debug_out, conv_id]).then(lambda: "", None, [msg])
+                   outputs=[msg, chatbot, debug_out, conv_id, radio]).then(lambda: "", None, [msg])
         msg.submit(_sync_respond, inputs=[msg, chatbot, conv_id],
-                   outputs=[msg, chatbot, debug_out, conv_id]).then(lambda: "", None, [msg])
+                   outputs=[msg, chatbot, debug_out, conv_id, radio]).then(lambda: "", None, [msg])
         new_btn.click(new_chat, outputs=[chatbot, msg, debug_out, conv_id, radio])
         radio.select(handle_radio_select, outputs=[chatbot, msg, debug_out, conv_id])
+        demo.load(_build_radio, outputs=[radio])
 
     demo.launch(server_name="127.0.0.1", server_port=7860)
 

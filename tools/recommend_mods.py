@@ -5,11 +5,18 @@ from pipeline.storage.db import SessionLocal
 
 
 def recommend_mods_with_session(session, *, tags: list[str], mc_version: str | None = None,
-                                loader: str | None = None, top_k: int = 5) -> list[dict]:
+                                loader: str | None = None, top_k: int = 5,
+                                exclude_ids: list[str] | None = None) -> list[dict]:
     if not tags:
         return []
     conds = ["m.tags IS NOT NULL"]
     params: dict = {"taglist": tuple(tags), "limit": top_k}
+    if exclude_ids:
+        # MySQL: exclude specific mod_ids
+        placeholders = ", ".join(f":ex_{i}" for i in range(len(exclude_ids)))
+        conds.append(f"m.mod_id NOT IN ({placeholders})")
+        for i, mid in enumerate(exclude_ids):
+            params[f"ex_{i}"] = mid
     if mc_version:
         conds.append("JSON_CONTAINS(m.mc_versions, :mcver)")
         params["mcver"] = f'"{mc_version}"'
@@ -80,11 +87,12 @@ def _fallback_search(session, tags, mc_version, loader, top_k):
 
 
 def recommend_mods(tags: list[str], mc_version: str | None = None,
-                   loader: str | None = None, top_k: int = 5) -> list[dict]:
+                   loader: str | None = None, top_k: int = 5,
+                   exclude_ids: list[str] | None = None) -> list[dict]:
     try:
         with SessionLocal() as session:
             return recommend_mods_with_session(session, tags=tags, mc_version=mc_version,
-                                               loader=loader, top_k=top_k)
+                                               loader=loader, top_k=top_k, exclude_ids=exclude_ids)
     except Exception as e:
         logger.exception("recommend_mods failed")
         return [{"error": str(e)}]
