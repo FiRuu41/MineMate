@@ -1,4 +1,4 @@
-.PHONY: up down init build-index run test lint format
+.PHONY: up down init build-index run test lint format tag extract-integrations
 
 up:
 	docker-compose up -d
@@ -23,3 +23,9 @@ lint:
 
 format:
 	uv run ruff format .
+
+tag:
+	uv run python -m pipeline.tag_mods
+
+extract-integrations:
+	uv run python -m pipeline.extract_integrations

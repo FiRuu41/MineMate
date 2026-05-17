@@ -1,0 +1,22 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Lint
+        run: ruff check .
+      - name: Test
+        env:
+          DEEPSEEK_API_KEY: sk-test
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_USER: test
+          MYSQL_PASSWORD: test
+          MYSQL_DB: test
+        run: pytest -v
