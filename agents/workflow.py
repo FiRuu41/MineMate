@@ -1,5 +1,6 @@
-from kb.schemas import Chunk
+from loguru import logger
 
+from kb.schemas import Chunk
 from config.settings import settings
 
 
