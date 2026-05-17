@@ -121,16 +121,30 @@ def main() -> None:
     setup_logging()
     handler = build_handler()
 
+    import random as _random
+    _STATUS_MSGS = [
+        "⛏️ 正在挖掘数据...", "📚 翻阅模组百科中...", "🔍 查找相关资料...",
+        "💭 思考中...", "📖 检索知识库...", "⏳ 正在整理信息...",
+        "🧭 探索模组世界...", "🕯️ 点亮知识火把..."
+    ]
+
     async def respond(message: str, history: list, conv_id: str):
         if not message.strip():
-            return "", history, "", "", conv_id
-        answer, debug = await handler.chat(message)
-        status = handler._last_status
+            yield "", history, "", "", conv_id, _build_radio()
+            return
         history.append({"role": "user", "content": message})
-        history.append({"role": "assistant", "content": answer})
+        # Show random status in chatbot as placeholder
+        status_msg = _random.choice(_STATUS_MSGS)
+        history.append({"role": "assistant", "content": f"_{status_msg}_"})
+        yield "", history, "", status_msg, conv_id, _build_radio()
+        # Now do the real work
+        answer, debug = await handler.chat(message)
+        # Replace placeholder with real answer
+        history[-1] = {"role": "assistant", "content": answer}
+        status = handler._last_status
         title = history[0]["content"][:40] if history else "新对话"
         _save_conv(conv_id, history, title)
-        return "", history, debug, status, conv_id, _build_radio()
+        yield "", history, debug, status, conv_id, _build_radio()
 
     STEVE_AVATAR = "https://minotar.net/helm/Steve/64.png"
     BOT_AVATAR = "https://minotar.net/helm/GrassBlock/64.png"
@@ -215,15 +229,10 @@ def main() -> None:
                     )
                     send = gr.Button("发送", variant="primary", scale=1)
 
-        # Events
-        def _sync_respond(m, h, cid):
-            if not m.strip():
-                return m, h, "", cid
-            return asyncio.run(respond(m, h, cid))
-
-        send.click(_sync_respond, inputs=[msg, chatbot, conv_id],
+        # Events — respond is an async generator for live status updates
+        send.click(respond, inputs=[msg, chatbot, conv_id],
                    outputs=[msg, chatbot, debug_out, status_bar, conv_id, radio]).then(lambda: "", None, [msg])
-        msg.submit(_sync_respond, inputs=[msg, chatbot, conv_id],
+        msg.submit(respond, inputs=[msg, chatbot, conv_id],
                    outputs=[msg, chatbot, debug_out, status_bar, conv_id, radio]).then(lambda: "", None, [msg])
         new_btn.click(new_chat, outputs=[chatbot, msg, debug_out, status_bar, conv_id, radio])
         del_btn.click(
