@@ -1,0 +1,50 @@
+{"query": "机械动力是什么模组", "expected_intent": "kb_query", "expected_keywords": ["机械动力", "Create"]}
+{"query": "机械动力怎么玩", "expected_intent": "kb_query", "expected_keywords": ["机械动力", "Create", "玩法"]}
+{"query": "机械动力有什么功能", "expected_intent": "kb_query", "expected_keywords": ["机械动力", "Create", "功能"]}
+{"query": "机械动力的合成表哪里看", "expected_intent": "kb_query", "expected_keywords": ["机械动力", "Create", "合成表"]}
+{"query": "植物魔法是什么模组", "expected_intent": "kb_query", "expected_keywords": ["植物魔法", "Botania"]}
+{"query": "植物魔法怎么玩", "expected_intent": "kb_query", "expected_keywords": ["植物魔法", "Botania", "玩法"]}
+{"query": "植物魔法有哪些花", "expected_intent": "kb_query", "expected_keywords": ["植物魔法", "Botania", "花"]}
+{"query": "暮色森林怎么进入", "expected_intent": "kb_query", "expected_keywords": ["暮色森林", "入口"]}
+{"query": "暮色森林有哪些BOSS", "expected_intent": "kb_query", "expected_keywords": ["暮色森林", "BOSS"]}
+{"query": "JEI模组怎么用", "expected_intent": "kb_query", "expected_keywords": ["JEI", "使用"]}
+{"query": "冰火传说有哪些龙", "expected_intent": "kb_query", "expected_keywords": ["冰火传说", "龙"]}
+{"query": "拔刀剑怎么做", "expected_intent": "kb_query", "expected_keywords": ["拔刀剑", "制作"]}
+{"query": "匠魂怎么玩", "expected_intent": "kb_query", "expected_keywords": ["匠魂", "玩法"]}
+{"query": "匠魂有什么材料", "expected_intent": "kb_query", "expected_keywords": ["匠魂", "材料"]}
+{"query": "应用能源2怎么用", "expected_intent": "kb_query", "expected_keywords": ["应用能源2", "AE2"]}
+{"query": "应用能源2的存储系统怎么搭建", "expected_intent": "kb_query", "expected_keywords": ["应用能源2", "AE2", "存储"]}
+{"query": "工业时代2怎么发电", "expected_intent": "kb_query", "expected_keywords": ["工业时代2", "IC2", "发电"]}
+{"query": "神秘时代的研究系统怎么用", "expected_intent": "kb_query", "expected_keywords": ["神秘时代", "研究"]}
+{"query": "等价交换怎么用", "expected_intent": "kb_query", "expected_keywords": ["等价交换", "EMC"]}
+{"query": "等价交换的转换桌能做什么", "expected_intent": "kb_query", "expected_keywords": ["等价交换", "转换桌", "EMC"]}
+{"query": "无尽贪婪的终极装备怎么合成", "expected_intent": "kb_query", "expected_keywords": ["无尽贪婪", "装备"]}
+{"query": "血魔法的祭坛怎么搭建", "expected_intent": "kb_query", "expected_keywords": ["血魔法", "祭坛"]}
+{"query": "星系模组怎么去月球", "expected_intent": "kb_query", "expected_keywords": ["星系", "月球"]}
+{"query": "机械动力的动力系统怎么运转", "expected_intent": "kb_query", "expected_keywords": ["机械动力", "Create", "动力系统"]}
+{"query": "植物魔法的魔力系统工作原理", "expected_intent": "kb_query", "expected_keywords": ["植物魔法", "Botania", "魔力"]}
+{"query": "推荐恐怖类的模组", "expected_intent": "recommendation", "expected_keywords": ["恐怖", "推荐"]}
+{"query": "有没有科技类的模组推荐", "expected_intent": "recommendation", "expected_keywords": ["科技", "推荐"]}
+{"query": "适合建筑的模组有哪些", "expected_intent": "recommendation", "expected_keywords": ["建筑", "推荐"]}
+{"query": "推荐魔法类的模组", "expected_intent": "recommendation", "expected_keywords": ["魔法", "推荐"]}
+{"query": "有没有探险类的模组", "expected_intent": "recommendation", "expected_keywords": ["探险", "推荐"]}
+{"query": "推荐一些好玩的Minecraft模组", "expected_intent": "recommendation", "expected_keywords": ["好玩", "推荐"]}
+{"query": "有没有像机械动力一样的模组", "expected_intent": "recommendation", "expected_keywords": ["机械动力", "类似", "推荐"]}
+{"query": "推荐农业类模组", "expected_intent": "recommendation", "expected_keywords": ["农业", "推荐"]}
+{"query": "机械动力和植物魔法能一起用吗", "expected_intent": "compatibility", "expected_keywords": ["机械动力", "植物魔法", "兼容"]}
+{"query": "暮色森林兼容什么模组", "expected_intent": "compatibility", "expected_keywords": ["暮色森林", "兼容"]}
+{"query": "匠魂和冰火传说兼容吗", "expected_intent": "compatibility", "expected_keywords": ["匠魂", "冰火传说", "兼容"]}
+{"query": "应用能源2兼容哪些模组", "expected_intent": "compatibility", "expected_keywords": ["应用能源2", "兼容"]}
+{"query": "等价交换和神秘时代能一起装吗", "expected_intent": "compatibility", "expected_keywords": ["等价交换", "神秘时代", "兼容"]}
+{"query": "机械动力支持哪些MC版本", "expected_intent": "mod_info_query", "expected_keywords": ["机械动力", "版本"]}
+{"query": "植物魔法的作者是谁", "expected_intent": "mod_info_query", "expected_keywords": ["植物魔法", "作者"]}
+{"query": "暮色森林用什么Loader", "expected_intent": "mod_info_query", "expected_keywords": ["暮色森林", "Loader"]}
+{"query": "冰火传说的最新版本是多少", "expected_intent": "mod_info_query", "expected_keywords": ["冰火传说", "版本"]}
+{"query": "JEI支持哪些Minecraft版本", "expected_intent": "mod_info_query", "expected_keywords": ["JEI", "版本"]}
+{"query": "最近的Minecraft版本更新了什么内容", "expected_intent": "web_fallback", "expected_keywords": ["更新"]}
+{"query": "今天MC百科有什么新模组", "expected_intent": "web_fallback", "expected_keywords": ["新模组"]}
+{"query": "Minecraft下一个版本什么时候发布", "expected_intent": "web_fallback", "expected_keywords": ["版本", "发布"]}
+{"query": "你好", "expected_intent": "chitchat", "expected_keywords": ["你好"]}
+{"query": "你是谁", "expected_intent": "chitchat", "expected_keywords": ["谁"]}
+{"query": "今天天气怎么样", "expected_intent": "chitchat", "expected_keywords": ["天气"]}
+{"query": "你能做什么", "expected_intent": "chitchat", "expected_keywords": ["做什么"]}
