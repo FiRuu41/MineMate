@@ -1,4 +1,4 @@
-.PHONY: up down init crawl-demo build-index run test lint format
+.PHONY: up down init build-index run test lint format
 
 up:
 	docker-compose up -d
@@ -8,9 +8,6 @@ down:
 
 init:
 	uv run python -m scripts.init_db
-
-crawl-demo:
-	uv run python -m pipeline.crawl --mods create jei botania
 
 build-index:
 	uv run python -m pipeline.build_index

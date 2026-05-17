@@ -2,9 +2,7 @@
 
 > Your AI buddy for Minecraft mods.
 
-基于 mcmod.cn 的 Minecraft 模组智能体问答系统。
-
-> **当前版本：v0.1.0 MVP**：3 个示例模组（机械动力 / JEI / 植物魔法）+ Router/Answerer 双 Agent + 向量检索 + Gradio 单轮问答。详细设计见 `docs/superpowers/specs/2026-05-16-mc-mod-qa-design.md`。
+基于 mcmod.cn 的 Minecraft 模组智能体问答系统（RAG + Agent）。
 
 ## 架构
 
@@ -13,8 +11,6 @@
                     ↓                ↓
                   意图分类        Qdrant + BGE-M3
 ```
-
-数据来源：mcmod.cn。本项目本身**不包含**任何模组百科内容，使用者自行运行爬虫获取数据。
 
 ## Quick Start
 
@@ -25,43 +21,41 @@
 - DeepSeek API key
 
 ```bash
-git clone <repo>
+git clone https://github.com/FiRuu41/MineMate.git
 cd minemate
-cp .env.example .env           # 填入 DEEPSEEK_API_KEY
+cp .env.example .env           # 填入 DEEPSEEK_API_KEY（以及其他配置）
 uv sync                        # 安装依赖
 docker-compose up -d           # 启动 Qdrant + MySQL
 uv run python -m scripts.init_db
-uv run python -m pipeline.crawl --mods create jei botania
+# 导入你的模组数据到 MySQL（自行准备），然后：
 uv run python -m pipeline.build_index
 uv run python -m app.gradio_app
 ```
 
 打开 http://127.0.0.1:7860 即可问答。
 
+> **注意：本项目不包含爬虫代码和模组百科数据。** 使用者需自行准备数据并导入 MySQL `mods` 表（字段：`mod_id`, `name_zh`, `name_en`, `mcmod_url`, `loader`, `mc_versions`, `author`, `description`），然后运行 `build_index` 构建向量索引。
+
 ## 测试
 
 ```bash
-uv run pytest                 # 单元测试（默认跳过 slow/e2e/integration）
-uv run pytest -m integration  # 需要 Qdrant 在运行
+uv run pytest                 # 单元测试（默认跳过 slow）
 uv run pytest -m slow         # 需要下载 BGE-M3 模型 (~2GB)
-uv run pytest -m e2e          # 端到端，需要 Qdrant + 索引 + DeepSeek key
 ```
 
 ## 目录结构
-
-详见 `docs/superpowers/specs/2026-05-16-mc-mod-qa-design.md` § 9。
 
 ```
 MineMate/
 ├── config/         # pydantic-settings + loguru + prompts
 ├── kb/             # 领域模型 + 向量检索
-├── pipeline/       # 离线数据管线（爬取、清洗、切分、入库）
+├── pipeline/       # 数据管线（切分、入库）
 ├── llm/            # DeepSeek 封装 + Embedding 封装
 ├── tools/          # Agent 工具
 ├── agents/         # Router / Answerer / Workflow
 ├── app/            # Gradio UI
 ├── scripts/        # 初始化脚本
-└── tests/          # 单元 / 集成 / e2e
+└── tests/          # 单元测试
 ```
 
 ## License
@@ -70,4 +64,4 @@ MIT，详见 `LICENSE`。
 
 ## Disclaimer
 
-本项目仅作技术学习展示，不附带任何模组/百科内容数据。使用爬虫时请遵守 mcmod.cn 使用条款、控制请求频率（默认 1.5 秒间隔），尊重原作者版权。
+本项目仅作技术学习展示，不附带任何模组/百科内容数据。
