@@ -66,6 +66,21 @@ class AnswererAgent:
             if mp.get("disclaimer"):
                 lines.append(f"\n> {mp['disclaimer']}")
             parts.append("\n".join(lines))
+        if tool_results.get("mod_info"):
+            mi = tool_results["mod_info"]
+            if "error" not in mi:
+                lines = ["### 模组信息"]
+                lines.append(f"- 名称: {mi.get('name_zh', '')} ({mi.get('name_en', '')})")
+                if mi.get("loader"):
+                    lines.append(f"- Loader: {mi['loader']}")
+                if mi.get("mc_versions"):
+                    lines.append(f"- MC 版本: {', '.join(mi['mc_versions'])}")
+                if mi.get("author"):
+                    lines.append(f"- 作者: {mi['author']}")
+                if mi.get("description"):
+                    lines.append(f"- 简介: {mi['description'][:500]}")
+                lines.append(f"- 链接: {mi.get('mcmod_url', '')}")
+                parts.append("\n".join(lines))
         return "\n\n".join(parts) if parts else "（无可用资料）"
 
     def answer(self, question: str, chunks: list[Chunk], tool_results: dict | None = None) -> str:
