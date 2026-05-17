@@ -3,13 +3,16 @@
 
 类别（intent）：
 - kb_query：关于某个 MC 模组的知识、玩法、物品、机制等问题
+- recommendation：用户想找某类/某风格的模组，如"有没有恐怖模组""推荐几个科技模组"
+- compatibility：用户询问模组之间是否兼容/搭配，如"X可以和什么模组兼容""X和Y兼容吗"
 - chitchat：闲聊、问候、与 MC 模组无关的问题
 
 抽取的实体（entities）：
 - mod_name：用户提到的模组中文/英文名（如有）
+- tags：用户提到的风格/类型标签列表，如 ["恐怖"]、["科技"]（仅 recommendation）
 
 只返回 JSON，格式：
-{"intent": "kb_query" | "chitchat", "entities": {"mod_name": "..."}}
+{"intent": "kb_query" | "recommendation" | "compatibility" | "chitchat", "entities": {}}
 
 示例 1：
 用户：机械动力的动力源有哪些？
@@ -22,3 +25,11 @@
 示例 3：
 用户：植物魔法怎么入门
 {"intent": "kb_query", "entities": {"mod_name": "植物魔法"}}
+
+示例 4：
+用户：有没有恐怖点的模组
+{"intent": "recommendation", "entities": {"tags": ["恐怖"]}}
+
+示例 5：
+用户：机械动力可以和什么模组兼容
+{"intent": "compatibility", "entities": {"mod_name": "机械动力"}}

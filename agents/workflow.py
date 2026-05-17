@@ -4,10 +4,7 @@ from config.settings import settings
 
 
 class McmodWorkflow:
-    """Serial MVP workflow (router -> retriever -> answerer).
-
-    Stage 2 will migrate to llama_index.core.workflow.Workflow with Event-driven graph.
-    """
+    """Serial MVP workflow (router -> retriever/tools -> answerer)."""
 
     def __init__(self, router, retriever, answerer) -> None:
         self.router = router
@@ -20,12 +17,26 @@ class McmodWorkflow:
         entities = routing["entities"]
 
         chunks: list[Chunk] = []
+        tool_results: dict = {}
+
         if intent == "kb_query":
             mod_id = self._entity_to_mod_id(entities.get("mod_name"))
             chunks = self.retriever.retrieve(query, top_k=settings.top_k, mod_id=mod_id)
+        elif intent == "recommendation":
+            from tools.recommend_mods import recommend_mods
+            tags = entities.get("tags", [])
+            tool_results["recommendations"] = recommend_mods(tags=tags, top_k=5)
+        elif intent == "compatibility":
+            from tools.compatibility import get_compatible_mods
+            mod_name = entities.get("mod_name")
+            mod_id = self._entity_to_mod_id(mod_name)
+            if mod_id:
+                tool_results["compatible_mods"] = get_compatible_mods(mod_id)
+            else:
+                tool_results["compatible_mods"] = []
 
-        answer = self.answerer.answer(query, chunks)
-        return {"intent": intent, "answer": answer, "chunks": chunks}
+        answer = self.answerer.answer(query, chunks, tool_results)
+        return {"intent": intent, "answer": answer, "chunks": chunks, "tool_results": tool_results}
 
     @staticmethod
     def _entity_to_mod_id(mod_name: str | None) -> str | None:

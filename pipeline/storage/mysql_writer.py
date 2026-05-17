@@ -30,3 +30,15 @@ def upsert_mod(
     m.description = description
     m.updated_at = datetime.utcnow()
     return m
+
+
+def update_mod_tags(session: Session, mod_id: str, tags: dict) -> None:
+    m = session.get(Mod, mod_id)
+    if m:
+        m.tags = tags
+
+
+def update_mod_integrations(session: Session, mod_id: str, integrations: list[dict]) -> None:
+    m = session.get(Mod, mod_id)
+    if m:
+        m.known_integrations = integrations

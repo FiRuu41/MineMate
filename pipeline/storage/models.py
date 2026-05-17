@@ -17,6 +17,8 @@ class Mod(Base):
     mc_versions: Mapped[list | None] = mapped_column(JSON, nullable=True)
     author: Mapped[str | None] = mapped_column(String(128), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    tags: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    known_integrations: Mapped[list | None] = mapped_column(JSON, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
