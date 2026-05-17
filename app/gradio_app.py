@@ -225,14 +225,10 @@ def main() -> None:
                    outputs=[msg, chatbot, debug_out, status_bar, conv_id, radio]).then(lambda: "", None, [msg])
         msg.submit(_sync_respond, inputs=[msg, chatbot, conv_id],
                    outputs=[msg, chatbot, debug_out, status_bar, conv_id, radio]).then(lambda: "", None, [msg])
-        new_btn.click(new_chat, outputs=[chatbot, msg, debug_out, conv_id, radio])
+        new_btn.click(new_chat, outputs=[chatbot, msg, debug_out, status_bar, conv_id, radio])
         del_btn.click(
             lambda cid: delete_chat(cid), inputs=[conv_id],
-            outputs=[chatbot, msg, debug_out, conv_id, radio]
-        ).then(lambda: ("", "", "", _build_radio()), outputs=[status_bar, debug_out, chatbot, radio])
-        del_btn.click(
-            lambda cid: delete_chat(cid), inputs=[conv_id],
-            outputs=[chatbot, msg, debug_out, conv_id, radio]
+            outputs=[chatbot, msg, debug_out, status_bar, conv_id, radio]
         )
         radio.select(handle_radio_select, outputs=[chatbot, msg, debug_out, conv_id])
         demo.load(_build_radio, outputs=[radio])
