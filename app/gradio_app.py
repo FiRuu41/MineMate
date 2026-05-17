@@ -12,13 +12,13 @@ from agents.router import RouterAgent
 from agents.workflow import McmodWorkflow
 from app.chat_handler import ChatHandler
 from config.logging import setup_logging
-from kb.retriever import VectorRetriever
+from kb.retriever import HybridRetriever
 
 
 def build_handler() -> ChatHandler:
     workflow = McmodWorkflow(
         router=RouterAgent(),
-        retriever=VectorRetriever(),
+        retriever=HybridRetriever(),
         answerer=AnswererAgent(),
         critic=CriticAgent(),
     )
