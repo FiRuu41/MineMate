@@ -13,9 +13,12 @@ class RouterAgent:
         self.llm = llm or DeepSeekClient()
         self._system = PROMPT_PATH.read_text(encoding="utf-8")
 
-    def route(self, user_query: str) -> dict:
+    def route(self, user_query: str, chat_history: str = "") -> dict:
+        system_msg = self._system
+        if chat_history:
+            system_msg += f"\n\n{chat_history}"
         messages = [
-            {"role": "system", "content": self._system},
+            {"role": "system", "content": system_msg},
             {"role": "user", "content": user_query},
         ]
         try:

@@ -4,15 +4,15 @@ from config.settings import settings
 
 
 class McmodWorkflow:
-    """Serial MVP workflow (router -> retriever/tools -> answerer)."""
+    """MVP workflow with multi-turn memory support."""
 
     def __init__(self, router, retriever, answerer) -> None:
         self.router = router
         self.retriever = retriever
         self.answerer = answerer
 
-    async def run(self, *, query: str) -> dict:
-        routing = self.router.route(query)
+    async def run(self, *, query: str, chat_history: str = "") -> dict:
+        routing = self.router.route(query, chat_history=chat_history)
         intent = routing["intent"]
         entities = routing["entities"]
 
