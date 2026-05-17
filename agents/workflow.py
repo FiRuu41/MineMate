@@ -108,29 +108,42 @@ class McmodWorkflow:
                 status = self._status("web_fallback")
                 from tools.web_search_mcmod import web_search_mcmod
                 logger.info("kb_query not found, trying web fallback")
-                # Build a short keyword search query (not the full question)
+                # First: if we know the mod, go directly to its mcmod page
                 mod_name = entities.get("mod_name", "")
                 if isinstance(mod_name, list):
                     mod_name = mod_name[0] if mod_name else ""
-                # Extract key terms: mod name + first 30 chars of question
-                short_q = (mod_name + " " + original_query[:30]).strip() if mod_name else original_query[:40]
-                logger.info("web search query: {}", short_q)
-                web_results = web_search_mcmod(short_q, top_k=2, fetch_pages=True)
-                logger.info("web search got {} results", len(web_results))
-                if web_results and "error" not in web_results[0]:
-                    tool_results["web_results"] = web_results
-                    # Build context from web results
-                    web_context = "\n\n".join(
-                        r.get("page_content", r.get("snippet", ""))
-                        for r in web_results if "error" not in r
-                    )
-                    logger.info("web context: {} chars", len(web_context))
-                    if web_context:
-                        from kb.schemas import Chunk, ChunkMetadata
-                        fake_md = ChunkMetadata(mod_id="web", mod_name_zh="实时搜索", section="web",
-                                                 source_url=web_results[0].get("url", ""), title="实时搜索结果")
-                        chunks = [Chunk(text=web_context[:3000], metadata=fake_md, score=1.0)]
-                        answer = self.answerer.answer(original_query, chunks, {"web_results": web_results})
+                mod_id = self._entity_to_mod_id(mod_name)
+                web_context = ""
+                if mod_id:
+                    # Fetch the mod's page directly from MySQL URL
+                    from pipeline.storage.db import SessionLocal
+                    from pipeline.storage.models import Mod
+                    with SessionLocal() as s:
+                        m = s.get(Mod, mod_id)
+                        if m and m.mcmod_url:
+                            from tools.web_search_mcmod import fetch_page, parse_page_intro
+                            logger.info("Fetching mod page directly: {}", m.mcmod_url)
+                            html = fetch_page(m.mcmod_url)
+                            if html:
+                                web_context = parse_page_intro(html)
+                                logger.info("Fetched page: {} chars", len(web_context))
+                # Fallback: keyword search
+                if not web_context:
+                    short_q = (mod_name + " " + original_query[:30]).strip() if mod_name else original_query[:40]
+                    logger.info("Direct fetch failed, trying search: {}", short_q)
+                    web_results = web_search_mcmod(short_q, top_k=2, fetch_pages=True)
+                    if web_results and "error" not in web_results[0]:
+                        web_context = "\n\n".join(
+                            r.get("page_content", r.get("snippet", ""))
+                            for r in web_results if "error" not in r
+                        )
+                if web_context:
+                    from kb.schemas import Chunk, ChunkMetadata
+                    url = m.mcmod_url if mod_id else ""
+                    fake_md = ChunkMetadata(mod_id=mod_id or "web", mod_name_zh="在线获取", section="web",
+                                             source_url=url or "https://www.mcmod.cn", title="在线获取")
+                    chunks = [Chunk(text=web_context[:3000], metadata=fake_md, score=1.0)]
+                    answer = self.answerer.answer(original_query, chunks, {"web_results": [{"url": url}]})
 
         elif intent == "mod_info_query":
             status = self._status("info")

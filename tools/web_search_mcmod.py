@@ -37,7 +37,7 @@ def _get_proxy() -> str | None:
     return _proxy_ips.pop() if _proxy_ips else None
 
 
-def _try_fetch(url: str, proxy: str | None = None) -> str | None:
+def _tryfetch_page(url: str, proxy: str | None = None) -> str | None:
     """One attempt to fetch URL, with or without proxy."""
     try:
         client_kwargs = {"timeout": 25, "follow_redirects": False}
@@ -62,10 +62,10 @@ def _try_fetch(url: str, proxy: str | None = None) -> str | None:
         return None
 
 
-def _fetch(url: str) -> str | None:
+def fetch_page(url: str) -> str | None:
     """Fetch URL, trying direct first, then proxy."""
     # Try direct
-    html = _try_fetch(url, proxy=None)
+    html = _tryfetch_page(url, proxy=None)
     if html:
         return html
     # Try proxy
@@ -73,11 +73,11 @@ def _fetch(url: str) -> str | None:
     if ip:
         proxy_url = f"http://{PROXY_USER}:{PROXY_PASS}@{ip}"
         logger.info("Direct failed, trying proxy {}", ip)
-        return _try_fetch(url, proxy=proxy_url)
+        return _tryfetch_page(url, proxy=proxy_url)
     return None
 
 
-def _parse_intro(html: str) -> str:
+def parse_page_intro(html: str) -> str:
     soup = BeautifulSoup(html, "lxml")
     name = (soup.select_one(".class-title h3") or soup.new_tag("span")).get_text(strip=True)
     desc = "\n".join(p.get_text("\n", strip=True) for p in soup.select(".common-text p") if p.get_text(strip=True))
@@ -86,7 +86,7 @@ def _parse_intro(html: str) -> str:
 
 def web_search_mcmod(query: str, top_k: int = 2, fetch_pages: bool = True) -> list[dict]:
     try:
-        html = _fetch(f"https://search.mcmod.cn/s?key={query}")
+        html = fetch_page(f"https://search.mcmod.cn/s?key={query}")
         if not html:
             return [{"error": "search failed - network error or banned"}]
 
@@ -104,9 +104,9 @@ def web_search_mcmod(query: str, top_k: int = 2, fetch_pages: bool = True) -> li
 
         if fetch_pages and results:
             for r in results[:2]:
-                page_html = _fetch(r["url"])
+                page_html = fetch_page(r["url"])
                 if page_html:
-                    r["page_content"] = _parse_intro(page_html)
+                    r["page_content"] = parse_page_intro(page_html)
                 time.sleep(0.5)
 
         return results[:top_k]
