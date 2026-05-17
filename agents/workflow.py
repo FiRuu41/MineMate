@@ -204,8 +204,23 @@ class McmodWorkflow:
         else:
             answer = self.answerer.answer(query, chunks, tool_results)
 
-        # Done — show answering status
-        status = self._status("answering")
+        # Done — set informative status based on what happened
+        if tool_results.get("web_results"):
+            status = "🌐 已通过在线搜索找到答案"
+        elif tool_results.get("recommendations"):
+            n = len(tool_results["recommendations"])
+            status = f"🎯 为你找到 {n} 个匹配模组"
+        elif tool_results.get("modpack"):
+            status = "📦 已编排整合包"
+        elif tool_results.get("compatible_mods"):
+            n = len(tool_results["compatible_mods"])
+            status = f"🔗 找到 {n} 个兼容模组" if n else "🔗 未找到已知兼容模组"
+        elif intent == "chitchat":
+            status = "💬"
+        elif "未在知识库" in answer:
+            status = "❌ 未找到相关信息"
+        else:
+            status = "✅ 已从知识库找到答案"
         return {
             "intent": intent, "answer": answer, "chunks": chunks,
             "tool_results": tool_results, "retry_count": retry_count, "status": status,
