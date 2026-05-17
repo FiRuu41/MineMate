@@ -130,21 +130,14 @@ def main() -> None:
 
     async def respond(message: str, history: list, conv_id: str):
         if not message.strip():
-            yield "", history, "", "", conv_id, _build_radio()
-            return
-        history.append({"role": "user", "content": message})
-        # Show random status in chatbot as placeholder
-        status_msg = _random.choice(_STATUS_MSGS)
-        history.append({"role": "assistant", "content": f"_{status_msg}_"})
-        yield "", history, "", status_msg, conv_id, _build_radio()
-        # Now do the real work
+            return "", history, "", f"💡 {_random.choice(_STATUS_MSGS)}", conv_id, _build_radio()
         answer, debug = await handler.chat(message)
-        # Replace placeholder with real answer
-        history[-1] = {"role": "assistant", "content": answer}
         status = handler._last_status
+        history.append({"role": "user", "content": message})
+        history.append({"role": "assistant", "content": answer})
         title = history[0]["content"][:40] if history else "新对话"
         _save_conv(conv_id, history, title)
-        yield "", history, debug, status, conv_id, _build_radio()
+        return "", history, debug, status, conv_id, _build_radio()
 
     STEVE_AVATAR = "https://minotar.net/helm/Steve/64.png"
     BOT_AVATAR = "https://minotar.net/helm/GrassBlock/64.png"

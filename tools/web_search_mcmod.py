@@ -11,13 +11,13 @@ from bs4 import BeautifulSoup
 from loguru import logger
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0"
-PROXY_URL = "http://d2645551915:vby8n2ny@k773.kdltps.com:15818"
+PROXY_URL = "http://t17900430677647:974tonyg@k773.kdltps.com:15818"
 TOKEN_RE = re.compile(r"yxd_token['\"]?\s*[=:']\s*['\"]?([a-f0-9]+)", re.I)
 
 
 def _fetch(url: str) -> str | None:
     """Fetch with cookie bypass via proxy."""
-    with httpx.Client(proxy=httpx.Proxy(url=PROXY_URL), timeout=25, follow_redirects=False) as c:
+    with httpx.Client(proxy=PROXY_URL, timeout=25, follow_redirects=False) as c:
         try:
             r1 = c.get(url, headers={"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9"})
             m = TOKEN_RE.search(r1.text)
