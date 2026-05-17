@@ -13,7 +13,20 @@
 
 抽取的实体（entities）：
 - mod_name：用户提到的模组中文/英文名（如有）
-- tags：用户提到的风格/类型标签列表，如 ["恐怖"]、["科技"]（仅 recommendation）
+- tags：根据用户描述转换为具体的风格标签（仅 recommendation/latest_mods/modpack_curation 需要）。标签必须从以下候选集中选择：
+  科技, 魔法, 冒险, 建筑, 农业, RPG, 恐怖, 探索, 战斗, 交通, 存储, 装饰, 辅助, 优化, 生存, 奇幻, 科幻, 搞笑, 休闲, 硬核
+
+  关键词映射（用户说的 → 正确标签）：
+  有趣/好玩/娱乐/有意思 → 搞笑 或 休闲
+  酷/炫/帅气 → 科技 或 战斗
+  可爱/萌/Q版 → 装饰 或 休闲
+  真实/现实/拟真 → 硬核 或 生存
+  简单/轻松/不用动脑 → 休闲 或 辅助
+  难/挑战 → 硬核
+  害怕/惊悚/吓人 → 恐怖
+  美/好看/漂亮 → 建筑 或 装饰
+  爽/刷/肝 → RPG 或 冒险
+  养老/种田/佛系 → 农业 或 休闲
 
 只返回 JSON，格式：
 {"intent": "kb_query" | "recommendation" | "compatibility" | "mod_info_query" | "web_fallback" | "latest_mods" | "modpack_curation" | "chitchat", "entities": {}}
@@ -53,3 +66,11 @@
 示例 9：
 用户：我想要一个轻量的科技整合包 1.20.1版本
 {"intent": "modpack_curation", "entities": {"tags": ["科技"], "mc_version": "1.20.1", "preference": "轻量"}}
+
+示例 10：
+用户：推荐几个有趣的模组
+{"intent": "recommendation", "entities": {"tags": ["搞笑"]}}
+
+示例 11：
+用户：有没有比较酷的模组
+{"intent": "recommendation", "entities": {"tags": ["科技", "战斗"]}}
