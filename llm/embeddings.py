@@ -1,12 +1,14 @@
 import os
 from functools import lru_cache
 
-# Default to hf-mirror.com for China-friendly access. Honor user override.
-os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+from config.settings import settings
+
+# Set HF cache/env BEFORE importing HF libraries
+os.environ.setdefault("HF_ENDPOINT", settings.hf_endpoint or "https://hf-mirror.com")
+if settings.hf_home:
+    os.environ["HF_HOME"] = settings.hf_home
 
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding  # noqa: E402
-
-from config.settings import settings  # noqa: E402
 
 
 def _auto_detect_device() -> str:

@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     embedding_model: str = "BAAI/bge-m3"
     embedding_device: str = "auto"  # auto = CUDA if available, else CPU
 
+    # Storage paths
+    data_dir: str = "./data"
+    hf_home: str = ""       # HuggingFace cache, empty = use default (~/.cache/huggingface)
+    hf_endpoint: str = ""   # HuggingFace mirror, empty = use default (hf-mirror.com)
+
     # Pipeline
     crawl_delay_seconds: float = 1.5
     tutorial_limit_per_mod: int = 30

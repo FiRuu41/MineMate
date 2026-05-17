@@ -1,0 +1,86 @@
+{
+  "id": "1779032863239",
+  "title": [
+    {
+      "text": "在匠魂（Tinkers’ Construct）模组中，下列哪种材料制作的部件自带“自动修复”属性？\nA. 玛玉灵\nB. 钴\nC. 许多锭\nD. 绿宝金",
+      "type": "text"
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "metadata": null,
+      "content": [
+        {
+          "text": "在匠魂（Tinkers’ Construct）模组中，下列哪种材料制作的部件自带“自动修复”属性？\nA. 玛玉灵\nB. 钴\nC. 许多锭\nD. 绿宝金",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "assistant",
+      "metadata": null,
+      "content": [
+        {
+          "text": "未在知识库中找到相关信息。",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "user",
+      "metadata": null,
+      "content": [
+        {
+          "text": "你好",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "assistant",
+      "metadata": null,
+      "content": [
+        {
+          "text": "你好！很高兴见到你～有什么关于 Minecraft 模组的问题需要帮忙吗？尽管问我，我会尽力根据资料为你解答。😊",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "user",
+      "metadata": null,
+      "content": [
+        {
+          "text": "我上个问题问了什么",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "assistant",
+      "metadata": null,
+      "content": [
+        {
+          "text": "您好！由于对话没有历史记录，我无法得知您上一个问题是什么。如果您想继续咨询某个模组相关的问题，欢迎直接提问，我会根据提供的资料为您解答。",
+          "type": "text"
+        }
+      ],
+      "options": null
+    },
+    {
+      "role": "user",
+      "content": "在匠魂（Tinkers’ Construct）模组中，下列哪种材料制作的部件自带“自动修复”属性？\nA. 玛玉灵\nB. 钴\nC. 许多锭\nD. 绿宝金"
+    },
+    {
+      "role": "assistant",
+      "content": "未在知识库中找到相关信息。"
+    }
+  ],
+  "updated": 1779033570.7383308
+}
