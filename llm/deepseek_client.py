@@ -34,5 +34,15 @@ class DeepSeekClient:
             temperature=temperature,
             response_format={"type": "json_object"},
         )
-        text = resp.choices[0].message.content or "{}"
-        return json.loads(text)
+        text = (resp.choices[0].message.content or "{}").strip()
+        # DeepSeek 偶尔在 json_object 模式仍返回 ```json ... ``` 包裹的内容
+        if text.startswith("```"):
+            text = text.split("```")[1].lstrip("json").strip()
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError as e:
+            logger.warning(
+                "chat_json: invalid JSON, returning empty dict. error={} snippet={!r}",
+                e, text[:120],
+            )
+            return {}
