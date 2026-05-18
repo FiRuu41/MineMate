@@ -12,7 +12,6 @@ git clone https://github.com/FiRuu41/MineMate.git
 cd minemate
 cp .env.example .env
 uv sync
-docker-compose up -d
 uv run python -m scripts.init_db
 ```
 
