@@ -12,12 +12,11 @@ from pathlib import Path
 # Ensure project root importable when invoked as module
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from agents.workflow import McmodWorkflow  # noqa: E402
-from agents.router import RouterAgent  # noqa: E402
 from agents.answerer import AnswererAgent  # noqa: E402
 from agents.critic import CriticAgent  # noqa: E402
+from agents.router import RouterAgent  # noqa: E402
+from agents.workflow import McmodWorkflow  # noqa: E402
 from kb.retriever import HybridRetriever  # noqa: E402
-
 
 QA_PATH = Path(__file__).resolve().parent.parent / "tests" / "eval" / "qa_set.jsonl"
 
@@ -100,7 +99,11 @@ async def main_async(limit: int | None, output: Path | None) -> int:
         print()
         print(f"Failed cases ({len(fails)}):")
         for r in fails:
-            print(f"  - {r['query'][:50]}  [{r['actual_intent']} vs {r['expected_intent']}, hit={r['hit_rate']*100:.0f}%]")
+            print(
+                f"  - {r['query'][:50]}  "
+                f"[{r['actual_intent']} vs {r['expected_intent']}, "
+                f"hit={r['hit_rate']*100:.0f}%]"
+            )
 
     if output:
         output.write_text(

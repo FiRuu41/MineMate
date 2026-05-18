@@ -29,7 +29,8 @@ class HybridRetriever:
         if not keywords:
             return []
 
-        from sqlalchemy import or_, func
+        from sqlalchemy import func, or_
+
         from pipeline.storage.db import SessionLocal
         from pipeline.storage.models import Mod
 

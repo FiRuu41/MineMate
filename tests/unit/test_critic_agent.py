@@ -9,7 +9,9 @@ def test_critic_passes():
     fake_llm = MagicMock()
     fake_llm.chat_json.return_value = {"pass": True, "reason": "回答正确", "suggestion": ""}
     critic = CriticAgent(llm=fake_llm)
-    result = critic.review("什么是机械动力", "机械动力是一个工程模组", "参考资料：机械动力是工程模组")
+    result = critic.review(
+        "什么是机械动力", "机械动力是一个工程模组", "参考资料：机械动力是工程模组",
+    )
     assert result["pass"] is True
     assert result["reason"] == "回答正确"
     assert result["suggestion"] == ""
@@ -18,9 +20,13 @@ def test_critic_passes():
 def test_critic_fails():
     """Critic returns pass=False when answer has issues."""
     fake_llm = MagicMock()
-    fake_llm.chat_json.return_value = {"pass": False, "reason": "存在幻觉", "suggestion": "请基于参考资料回答"}
+    fake_llm.chat_json.return_value = {
+        "pass": False, "reason": "存在幻觉", "suggestion": "请基于参考资料回答",
+    }
     critic = CriticAgent(llm=fake_llm)
-    result = critic.review("什么是机械动力", "机械动力是一个魔法模组", "参考资料：机械动力是工程模组")
+    result = critic.review(
+        "什么是机械动力", "机械动力是一个魔法模组", "参考资料：机械动力是工程模组",
+    )
     assert result["pass"] is False
     assert result["reason"] == "存在幻觉"
     assert result["suggestion"] == "请基于参考资料回答"

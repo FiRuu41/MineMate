@@ -28,9 +28,14 @@ def search_mcmod_kb_with(retriever: HybridRetriever, *, query: str, mod_id: str 
 _DEFAULT_RETRIEVER: HybridRetriever | None = None
 
 
-def search_mcmod_kb(query: str, mod_id: str | None = None, section: str | None = None, top_k: int = 8):
+def search_mcmod_kb(
+    query: str, mod_id: str | None = None,
+    section: str | None = None, top_k: int = 8,
+):
     """Default-retriever convenience wrapper for LlamaIndex FunctionTool."""
     global _DEFAULT_RETRIEVER
     if _DEFAULT_RETRIEVER is None:
         _DEFAULT_RETRIEVER = HybridRetriever()
-    return search_mcmod_kb_with(_DEFAULT_RETRIEVER, query=query, mod_id=mod_id, section=section, top_k=top_k)
+    return search_mcmod_kb_with(
+        _DEFAULT_RETRIEVER, query=query, mod_id=mod_id, section=section, top_k=top_k,
+    )

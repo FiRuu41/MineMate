@@ -1,4 +1,5 @@
 from click.testing import CliRunner
+
 from minemate.cli import main
 
 
@@ -22,7 +23,9 @@ def test_status_fails_without_env():
 
 def _make_test_zip(tmp_path, mod_count=1):
     """Helper: build a tiny valid minemate-data zip for tests."""
-    import json, sqlite3, zipfile
+    import json
+    import sqlite3
+    import zipfile
 
     db_src = tmp_path / "src.db"
     conn = sqlite3.connect(db_src)
@@ -46,7 +49,8 @@ def _make_test_zip(tmp_path, mod_count=1):
 def test_import_data_aborts_when_destination_exists(tmp_path):
     """Without force, import_data raises ImportError_ on existing destination."""
     import pytest
-    from scripts.import_data import import_data, ImportError_
+
+    from scripts.import_data import ImportError_, import_data
 
     zip_path = _make_test_zip(tmp_path)
     dest_db = tmp_path / "minemate.db"
@@ -82,7 +86,8 @@ def test_import_data_with_force_overwrites(tmp_path):
 def test_import_data_rejects_corrupted_zip(tmp_path):
     """Bad zip → ImportError_ with 'corrupted' in message."""
     import pytest
-    from scripts.import_data import import_data, ImportError_
+
+    from scripts.import_data import ImportError_, import_data
 
     bad_zip = tmp_path / "bad.zip"
     bad_zip.write_text("not a zip file")
@@ -95,8 +100,9 @@ def test_import_data_rejects_corrupted_zip(tmp_path):
 
 def test_build_tags_shows_warning(monkeypatch):
     """build-tags with --yes should skip countdown and call pipeline.tag_mods.main."""
-    from click.testing import CliRunner
     import sys
+
+    from click.testing import CliRunner
 
     fake_main_calls = []
 
@@ -153,6 +159,7 @@ def test_setup_reports_4_stages(monkeypatch):
 def test_install_chromium_invokes_playwright(monkeypatch):
     """install-chromium should call playwright.__main__.main with ['install', 'chromium']."""
     import sys
+
     from click.testing import CliRunner
 
     captured_argv = []

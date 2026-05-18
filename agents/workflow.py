@@ -1,10 +1,9 @@
+import random
+
 from loguru import logger
 
-from kb.schemas import Chunk
 from config.settings import settings
-
-
-import random
+from kb.schemas import Chunk, ChunkMetadata
 
 STATUS_MSGS = {
     "routing": [
@@ -65,7 +64,9 @@ class McmodWorkflow:
     def _status(self, key: str) -> str:
         return random.choice(STATUS_MSGS.get(key, ["⏳ 处理中..."]))
 
-    async def run(self, *, query: str, chat_history: str = "", exclude_ids: list[str] | None = None) -> dict:
+    async def run(
+        self, *, query: str, chat_history: str = "", exclude_ids: list[str] | None = None,
+    ) -> dict:
         status = self._status("routing")
         routing = self.router.route(query, chat_history=chat_history)
         intent = routing["intent"]
@@ -97,7 +98,9 @@ class McmodWorkflow:
 
                 # Rewrite query with critic feedback and re-retrieve
                 query = f"{original_query}（补充信息：{review['suggestion']}）"
-                chunks = self.retriever.retrieve(query, top_k=settings.top_k * (retry + 2), mod_id=mod_id)
+                chunks = self.retriever.retrieve(
+                    query, top_k=settings.top_k * (retry + 2), mod_id=mod_id,
+                )
 
             # If final review still failed, prefix warning
             if not review.get("pass"):
@@ -129,7 +132,10 @@ class McmodWorkflow:
                                 logger.info("Fetched page: {} chars", len(web_context))
                 # Fallback: keyword search
                 if not web_context:
-                    short_q = (mod_name + " " + original_query[:30]).strip() if mod_name else original_query[:40]
+                    short_q = (
+                        (mod_name + " " + original_query[:30]).strip()
+                        if mod_name else original_query[:40]
+                    )
                     logger.info("Direct fetch failed, trying search: {}", short_q)
                     web_results = web_search_mcmod(short_q, top_k=2, fetch_pages=True)
                     if web_results and "error" not in web_results[0]:
@@ -138,17 +144,23 @@ class McmodWorkflow:
                             for r in web_results if "error" not in r
                         )
                 if web_context:
-                    from kb.schemas import Chunk, ChunkMetadata
                     page_url = ""
                     if mod_id:
                         try:
                             page_url = m.mcmod_url or ""
                         except NameError:
                             page_url = ""
-                    fake_md = ChunkMetadata(mod_id=mod_id or "web", mod_name_zh="在线获取", section="intro",
-                                             source_url=page_url or "https://www.mcmod.cn", title="在线获取")
+                    fake_md = ChunkMetadata(
+                        mod_id=mod_id or "web",
+                        mod_name_zh="在线获取",
+                        section="intro",
+                        source_url=page_url or "https://www.mcmod.cn",
+                        title="在线获取",
+                    )
                     chunks = [Chunk(text=web_context[:3000], metadata=fake_md, score=1.0)]
-                    answer = self.answerer.answer(original_query, chunks, {"web_results": [{"url": page_url}]})
+                    answer = self.answerer.answer(
+                        original_query, chunks, {"web_results": [{"url": page_url}]},
+                    )
 
         elif intent == "mod_info_query":
             status = self._status("info")
@@ -170,7 +182,9 @@ class McmodWorkflow:
             from tools.find_latest_mods import find_latest_mods
             tags = entities.get("tags", [])
             mc_ver = entities.get("mc_version")
-            tool_results["latest_mods"] = find_latest_mods(tags=tags or None, mc_version=mc_ver, top_k=15)
+            tool_results["latest_mods"] = find_latest_mods(
+                tags=tags or None, mc_version=mc_ver, top_k=15,
+            )
             answer = self.answerer.answer(query, chunks, tool_results)
 
         elif intent == "modpack_curation":
@@ -189,7 +203,9 @@ class McmodWorkflow:
             status = self._status("recommend")
             from tools.recommend_mods import recommend_mods
             tags = entities.get("tags", [])
-            tool_results["recommendations"] = recommend_mods(tags=tags, top_k=15, exclude_ids=exclude_ids)
+            tool_results["recommendations"] = recommend_mods(
+                tags=tags, top_k=15, exclude_ids=exclude_ids,
+            )
             answer = self.answerer.answer(query, chunks, tool_results)
         elif intent == "compatibility":
             status = self._status("compat")

@@ -32,6 +32,7 @@ def test_resolved_sqlite_path_respects_absolute(monkeypatch):
 def test_collect_env_files_includes_home_minemate(monkeypatch):
     """_collect_env_files should always include ~/.minemate/.env."""
     from pathlib import Path
+
     from config.settings import _collect_env_files
 
     monkeypatch.delenv("MINEMATE_HOME", raising=False)
@@ -43,6 +44,7 @@ def test_collect_env_files_includes_home_minemate(monkeypatch):
 def test_collect_env_files_with_minemate_home(monkeypatch, tmp_path):
     """When MINEMATE_HOME is set, $MINEMATE_HOME/.env appears before ~/.minemate/.env."""
     from pathlib import Path
+
     from config.settings import _collect_env_files
 
     monkeypatch.setenv("MINEMATE_HOME", str(tmp_path))

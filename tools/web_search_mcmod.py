@@ -89,8 +89,13 @@ def fetch_page(url: str) -> str | None:
 
 def parse_page_intro(html: str) -> str:
     soup = BeautifulSoup(html, "lxml")
-    name_zh = (soup.select_one(".class-title h3") or BeautifulSoup("", "lxml").new_tag("span")).get_text(strip=True)
-    desc_parts = [p.get_text("\n", strip=True) for p in soup.select(".common-text p") if p.get_text(strip=True)]
+    title_el = soup.select_one(".class-title h3") or BeautifulSoup("", "lxml").new_tag("span")
+    name_zh = title_el.get_text(strip=True)
+    desc_parts = [
+        p.get_text("\n", strip=True)
+        for p in soup.select(".common-text p")
+        if p.get_text(strip=True)
+    ]
     return f"模组：{name_zh}\n{''.join(desc_parts)[:3000]}"
 
 

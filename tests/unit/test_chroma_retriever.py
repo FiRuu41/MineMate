@@ -1,6 +1,3 @@
-import pytest
-import tempfile
-from pathlib import Path
 
 
 def test_chroma_retriever_imports():

@@ -1,6 +1,5 @@
 """Mod recommendation by tag matching. Works with both SQLite and MySQL."""
 from loguru import logger
-from sqlalchemy import text
 
 from pipeline.storage.db import SessionLocal
 from pipeline.storage.models import Mod

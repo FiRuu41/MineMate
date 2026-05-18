@@ -9,7 +9,9 @@ from config.settings import settings
 
 class DeepSeekClient:
     def __init__(self, client: OpenAI | None = None) -> None:
-        self._client = client or OpenAI(api_key=settings.deepseek_api_key, base_url=settings.deepseek_base_url)
+        self._client = client or OpenAI(
+            api_key=settings.deepseek_api_key, base_url=settings.deepseek_base_url,
+        )
         self._model = settings.deepseek_model
 
     @retry(

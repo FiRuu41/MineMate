@@ -25,7 +25,10 @@ async def test_workflow_kb_query():
     fake_critic = MagicMock()
     fake_critic.review.return_value = {"pass": True, "reason": "good", "suggestion": ""}
 
-    wf = McmodWorkflow(router=fake_router, retriever=fake_retriever, answerer=fake_answerer, critic=fake_critic)
+    wf = McmodWorkflow(
+        router=fake_router, retriever=fake_retriever,
+        answerer=fake_answerer, critic=fake_critic,
+    )
     result = await wf.run(query="什么是机械动力")
     assert "[来源1]" in result["answer"]
     assert result["intent"] == "kb_query"

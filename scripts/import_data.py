@@ -115,7 +115,7 @@ def import_data(
             actual_sha = _sha256(sqlite_target)
             if actual_sha != expected_sha:
                 raise ImportError_(f"sha256 mismatch: expected {expected_sha}, got {actual_sha}")
-            echo(f"        sha256(db): match   OK")
+            echo("        sha256(db): match   OK")
     finally:
         zf.close()
 

@@ -30,7 +30,8 @@ def get_compatible_mods_with_session(session: Session, mod_id: str) -> list[dict
                 "mod_name_zh": linked_name,
                 "matched_mod_id": linked.mod_id if linked else None,
                 "common_mc_versions":
-                    list(set(m.mc_versions or []) & set(linked.mc_versions or [])) if linked else [],
+                    list(set(m.mc_versions or []) & set(linked.mc_versions or []))
+                    if linked else [],
                 "common_loader": _intersect_loader(m.loader, linked.loader) if linked else None,
                 "evidence": integ.get("evidence", ""),
                 "source_url": integ.get("source_url", ""),

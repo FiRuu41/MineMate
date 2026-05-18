@@ -1,4 +1,3 @@
-from unittest.mock import MagicMock
 
 from kb.retriever import HybridRetriever
 from kb.schemas import Chunk, ChunkMetadata
