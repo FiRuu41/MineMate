@@ -1,9 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "minemate"
 version = "0.1.0"
-description = "MineMate — your AI buddy for Minecraft mods (Q&A agent based on mcmod.cn)"
+description = "Your AI buddy for Minecraft mods — RAG + Multi-Agent Q&A based on mcmod.cn"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  {name = "FiRuu"},
+]
+keywords = [
+  "minecraft",
+  "minecraft-mod",
+  "mcmod",
+  "rag",
+  "agent",
+  "llm",
+  "chatbot",
+  "deepseek",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Games/Entertainment",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Natural Language :: Chinese (Simplified)",
+]
 dependencies = [
   "llama-index-core>=0.11.0",
   "llama-index-embeddings-huggingface>=0.3.0",
@@ -23,6 +54,14 @@ dependencies = [
   "playwright>=1.40",
 ]
 
+[project.urls]
+Homepage = "https://github.com/FiRuu41/MineMate"
+Repository = "https://github.com/FiRuu41/MineMate"
+"Bug Tracker" = "https://github.com/FiRuu41/MineMate/issues"
+
+[project.scripts]
+minemate = "minemate.cli:main"
+
 [dependency-groups]
 dev = [
   "pytest>=8.0",
@@ -32,14 +71,54 @@ dev = [
   "respx>=0.21",
 ]
 
-[project.scripts]
-minemate = "minemate.cli:main"
+[tool.hatch.build.targets.wheel]
+packages = [
+  "minemate",
+  "agents",
+  "app",
+  "config",
+  "kb",
+  "llm",
+  "pipeline",
+  "tools",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "minemate/",
+  "agents/",
+  "app/",
+  "config/",
+  "kb/",
+  "llm/",
+  "pipeline/",
+  "tools/",
+  "scripts/",
+  "README.md",
+  "LICENSE",
+  "pyproject.toml",
+  ".env.example",
+]
+exclude = [
+  "**/__pycache__",
+  "**/.pytest_cache",
+  "**/*.pyc",
+  "tests/",
+  "scripts/dev/",
+  "scripts/_remigrate.py",
+  "data/",
+  "out/",
+  "docs/",
+  ".env",
+  ".env.bak",
+  ".idea/",
+  ".vscode/",
+  ".git/",
+  ".github/",
+]
 
 [tool.uv]
 package = true
-
-[tool.setuptools.packages.find]
-include = ["minemate*"]
 
 [tool.ruff]
 line-length = 100
