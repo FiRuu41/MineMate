@@ -20,6 +20,7 @@ dependencies = [
   "openai>=1.40",
   "chromadb>=0.5",
   "click>=8.1",
+  "playwright>=1.40",
 ]
 
 [dependency-groups]

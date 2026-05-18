@@ -35,11 +35,15 @@ class Settings(BaseSettings):
     top_k: int = 8
     similarity_threshold: float = 0.5
 
-    # Proxy pool (only for pipeline/proxy_crawl.py — bulk crawler).
-    # Agent runtime (tools/web_search_mcmod.py) is direct-connection only since Phase 0.
+    # Proxy pool — used by pipeline/proxy_crawl.py AND tools/web_search_mcmod.py (Playwright + proxy).
+    # Local IPs commonly get banned by mcmod after a crawl session; rotate via proxy.
     proxy_api_url: str = ""
     proxy_user: str = ""
     proxy_pass: str = ""
+
+    # Playwright (Chromium) — used by web_search_mcmod for mcmod yxd_token JS bypass.
+    # If set, browser binaries go to this path (avoid C:\Users\...\AppData\Local\ms-playwright).
+    playwright_browsers_path: str = ""
 
     # App
     log_level: str = "INFO"

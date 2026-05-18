@@ -114,7 +114,9 @@ gradio-client==2.5.0
     #   gradio
     #   hf-gradio
 greenlet==3.5.0
-    # via sqlalchemy
+    # via
+    #   playwright
+    #   sqlalchemy
 griffe==2.0.2
     # via banks
 griffecli==2.0.2
@@ -301,6 +303,8 @@ platformdirs==4.9.6
     # via
     #   banks
     #   llama-index-core
+playwright==1.59.0
+    # via minemate (pyproject.toml)
 propcache==0.5.2
     # via
     #   aiohttp
@@ -331,6 +335,8 @@ pydantic-settings==2.14.1
     #   chromadb
 pydub==0.25.1
     # via gradio
+pyee==13.0.1
+    # via playwright
 pygments==2.20.0
     # via rich
 pypika==0.51.1
@@ -487,6 +493,7 @@ typing-extensions==4.15.0
     #   opentelemetry-semantic-conventions
     #   pydantic
     #   pydantic-core
+    #   pyee
     #   referencing
     #   sentence-transformers
     #   sqlalchemy
