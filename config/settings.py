@@ -58,7 +58,8 @@ class Settings(BaseSettings):
     top_k: int = 8
     similarity_threshold: float = 0.5
 
-    # Proxy pool — used by pipeline/proxy_crawl.py AND tools/web_search_mcmod.py (Playwright + proxy).
+    # Proxy pool — used by pipeline/proxy_crawl.py AND tools/web_search_mcmod.py
+    # (Playwright + proxy).
     # Local IPs commonly get banned by mcmod after a crawl session; rotate via proxy.
     proxy_api_url: str = ""
     proxy_user: str = ""

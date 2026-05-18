@@ -1,7 +1,7 @@
 import os
+
 os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 
-import asyncio
 import json
 import time
 
@@ -25,7 +25,8 @@ footer { display: none !important; }
 .gradio-container { max-width: 100% !important; margin: 0 !important; }
 /* Sidebar - dirt block inspired */
 #sidebar {
-    background: linear-gradient(180deg, #8B6914 0%, #A0855B 4px, #f3f4f6 4px, #f3f4f6 100%) !important;
+    background: linear-gradient(180deg, #8B6914 0%, #A0855B 4px,
+        #f3f4f6 4px, #f3f4f6 100%) !important;
     border-right: 3px solid #5D4E37 !important; padding: 0; min-height: 100vh;
 }
 #sidebar-header {
@@ -35,12 +36,18 @@ footer { display: none !important; }
     color: white !important;
     text-shadow: 1px 1px 0 #3D5C1E;
 }
-#sidebar-header h3 { color: white !important; font-weight: bold; font-size: 17px; letter-spacing: 1px; }
+#sidebar-header h3 {
+    color: white !important; font-weight: bold;
+    font-size: 17px; letter-spacing: 1px;
+}
 #sidebar-list button { text-align: left !important; font-size: 13px !important;
     padding: 10px 12px !important; border-radius: 0 !important; border: none !important;
     border-bottom: 1px solid #e5e7eb !important; background: transparent !important; }
 #sidebar-list button:hover { background: #e5e7eb !important; }
-#sidebar-list button.selected { background: #d4e6c8 !important; border-left: 3px solid #5D8A3C !important; }
+#sidebar-list button.selected {
+    background: #d4e6c8 !important;
+    border-left: 3px solid #5D8A3C !important;
+}
 #chat-col { padding: 0 !important; }
 /* Header bar - grass block */
 .header-bar {
@@ -63,7 +70,10 @@ footer { display: none !important; }
 /* Buttons - wood style */
 button.primary { background: #8B6914 !important; border: 2px solid #5D4E37 !important; }
 button.primary:hover { background: #A07818 !important; }
-button.secondary { background: #8B8B8B !important; border: 2px solid #606060 !important; color: white !important; }
+button.secondary {
+    background: #8B8B8B !important; border: 2px solid #606060 !important;
+    color: white !important;
+}
 /* Pixel art block corners on chatbot */
 #chatbot { border: 3px solid #8B6914; border-radius: 0 !important; }
 .debug-box textarea { font-size: 11px; font-family: 'Consolas', monospace; opacity: 0.6; }
@@ -186,12 +196,20 @@ def main() -> None:
         with gr.Row(equal_height=True):
             # Sidebar
             with gr.Column(scale=1, min_width=240, elem_id="sidebar"):
-                gr.HTML('<div id="sidebar-header"><h3 style="margin:0;font-size:16px">⛏️ MineMate</h3></div>')
+                gr.HTML(
+                    '<div id="sidebar-header">'
+                    '<h3 style="margin:0;font-size:16px">⛏️ MineMate</h3></div>'
+                )
                 new_btn = gr.Button("＋ 新对话", variant="secondary", size="sm")
                 del_btn = gr.Button("🗑 删除当前对话", variant="stop", size="sm")
-                radio = gr.Radio(choices=[], label="历史对话", interactive=True, elem_id="sidebar-list")
+                radio = gr.Radio(
+                    choices=[], label="历史对话", interactive=True, elem_id="sidebar-list",
+                )
                 with gr.Accordion("调试", open=False, elem_classes=["debug-box"]):
-                    debug_out = gr.Textbox(label="", lines=5, interactive=False, show_label=False, container=False)
+                    debug_out = gr.Textbox(
+                        label="", lines=5, interactive=False,
+                        show_label=False, container=False,
+                    )
 
             # Main chat
             with gr.Column(scale=4, elem_id="chat-col"):
@@ -200,7 +218,8 @@ def main() -> None:
                     buttons=["copy"], avatar_images=(STEVE_AVATAR, BOT_AVATAR),
                     placeholder="<div style='text-align:center;padding:80px 0'>"
                                   "<p style='font-size:3em;margin:0'>⛏️</p>"
-                                  "<p style='font-size:1.3em;color:#5D4E37;margin:10px 0'>MineMate</p>"
+                                  "<p style='font-size:1.3em;color:#5D4E37;margin:10px 0'>"
+                                  "MineMate</p>"
                                   "<p style='font-size:0.9em;color:#888'>你的 MC 模组智能助手</p>"
                                   "<p style='font-size:0.8em;color:#aaa;margin-top:30px'>"
                                   "💎 百科查询 · 🎯 风格推荐 · 🔗 兼容分析 · 📦 整合包</p>"

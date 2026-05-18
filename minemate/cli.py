@@ -8,7 +8,7 @@ _cwd = os.getcwd()
 if _cwd not in sys.path:
     sys.path.insert(0, _cwd)
 
-import click
+import click  # noqa: E402
 
 
 def _write_env_var(env_path, key: str, value: str) -> None:
@@ -41,6 +41,7 @@ def setup():
     """诊断 MineMate 设置：API key / 数据 / Playwright / BGE-M3。"""
     import os
     from pathlib import Path
+
     from config.settings import settings
 
     click.echo("========================================")
@@ -51,7 +52,9 @@ def setup():
     # Install mode detection
     try:
         import minemate as _m
-        install_mode = "PyPI" if "site-packages" in str(Path(_m.__file__).parent) else "源码（开发）"
+        install_mode = (
+            "PyPI" if "site-packages" in str(Path(_m.__file__).parent) else "源码（开发）"
+        )
     except Exception:
         install_mode = "未知"
     click.echo(f"安装模式: {install_mode}")
@@ -163,9 +166,10 @@ def start():
 @main.command()
 def status():
     """Show system status: data files, model cache, mod counts."""
-    from config.settings import settings
-    from pathlib import Path
     import os
+    from pathlib import Path
+
+    from config.settings import settings
 
     click.echo("=== MineMate Status ===")
 
@@ -187,7 +191,11 @@ def status():
         click.echo(f"  Chroma:  {click.style('MISSING', fg='yellow')}  expected at {chroma}")
 
     # BGE-M3 cache (HuggingFace)
-    hf_home = os.environ.get("HF_HOME") or settings.hf_home or str(Path.home() / ".cache" / "huggingface")
+    hf_home = (
+        os.environ.get("HF_HOME")
+        or settings.hf_home
+        or str(Path.home() / ".cache" / "huggingface")
+    )
     bge_dir = Path(hf_home) / "hub" / "models--BAAI--bge-m3"
     if bge_dir.exists():
         click.echo(f"  BGE-M3:  {click.style('OK', fg='green')}  cached at {bge_dir}")
@@ -206,8 +214,9 @@ def status():
 
     # Mod / tag counts
     try:
-        from pipeline.storage.db import SessionLocal
         from sqlalchemy import text
+
+        from pipeline.storage.db import SessionLocal
         with SessionLocal() as s:
             n = s.execute(text("SELECT COUNT(*) FROM mods")).scalar()
             tagged = s.execute(text("SELECT COUNT(*) FROM mods WHERE tags IS NOT NULL")).scalar()
@@ -217,12 +226,15 @@ def status():
 
 
 @main.command(name="import-data")
-@click.argument("zip_path", type=click.Path(exists=True, dir_okay=False, path_type=__import__("pathlib").Path))
+@click.argument(
+    "zip_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=__import__("pathlib").Path),
+)
 @click.option("--force", is_flag=True, default=False, help="Overwrite existing data at destination")
 def import_data_cmd(zip_path, force):
     """Import a minemate-data zip into local SQLite + Chroma paths."""
     from config.settings import settings
-    from scripts.import_data import import_data, ImportError_
+    from scripts.import_data import ImportError_, import_data
 
     try:
         import_data(
@@ -237,7 +249,7 @@ def import_data_cmd(zip_path, force):
     except ImportError_ as e:
         click.echo()
         click.echo(click.style(f"ERROR: {e}", fg="red"), err=True)
-        raise click.exceptions.Exit(1)
+        raise click.exceptions.Exit(1) from e
 
 
 @main.command(name="build-index")
@@ -245,6 +257,7 @@ def import_data_cmd(zip_path, force):
 def build_index_cmd(mod):
     """Build/rebuild Chroma vector index from SQLite mods (BGE-M3 embeddings)."""
     import sys
+
     from pipeline.build_index import main as _impl
     saved_argv = sys.argv
     sys.argv = ["build_index"] + (["--mod", mod] if mod else [])
@@ -277,7 +290,7 @@ def build_tags_cmd(workers, limit, yes):
         except KeyboardInterrupt:
             click.echo()
             click.echo(click.style("aborted.", fg="red"))
-            raise click.exceptions.Exit(130)
+            raise click.exceptions.Exit(130) from None
 
     from pipeline.tag_mods import main as _impl
     saved_argv = sys.argv
@@ -295,6 +308,7 @@ def build_tags_cmd(workers, limit, yes):
 def install_chromium_cmd():
     """Install Playwright Chromium browser (~130 MB) for mcmod web fallback."""
     import sys
+
     from playwright.__main__ import main as _pw_main
     click.echo("正在安装 Chromium 浏览器（约 130 MB）...")
     saved = sys.argv

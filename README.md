@@ -161,10 +161,26 @@ uv run minemate status      # 查看系统状态（SQLite/Chroma/模型/API key/
 ## 测试
 
 ```bash
-uv run pytest                 # 单元测试（63 个，约 1 分钟）
+uv run pytest                 # 单元测试（89+ 个，约 1 分钟）
 uv run pytest -m slow         # 含 BGE-M3 模型测试（需要 ~2GB 下载）
 uv run ruff check .           # Lint
 ```
+
+## 开发
+
+### Eval（本地跑，需 DeepSeek API key 和完整数据）
+
+```bash
+uv run python -m scripts.eval_qa --limit 5    # 快速冒烟，5 条 qa
+uv run python -m scripts.eval_qa              # 全套 50 条，约 10 分钟
+uv run python -m scripts.eval_qa --output out/eval.json  # 写 JSON 报告
+```
+
+eval 用你 `.env` 里的 `DEEPSEEK_MODEL` 跑全路径（router + retriever + answerer + critic），每次约 ¥1-3 token 费用。判定标准：`intent 匹配 + 关键词命中率 ≥ 70%`。
+
+### CI
+
+PR 合 main 前会自动跑 `ruff check` + `pytest`（默认排除 e2e/slow/integration markers）。Actions tab 看绿勾。
 
 ## 项目结构
 

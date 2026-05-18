@@ -26,7 +26,10 @@ class AnswererAgent:
             lines = ["### 推荐模组"]
             for r in recs:
                 tags_str = ", ".join(r.get("tags", {}).get("genres", []))
-                lines.append(f"- **{r['name_zh']}** ({r.get('name_en', '')}) — {tags_str} — {r['mcmod_url']}")
+                lines.append(
+                    f"- **{r['name_zh']}** ({r.get('name_en', '')}) — "
+                    f"{tags_str} — {r['mcmod_url']}"
+                )
             parts.append("\n".join(lines))
         if tool_results.get("compatible_mods"):
             comps = tool_results["compatible_mods"]
@@ -44,7 +47,10 @@ class AnswererAgent:
             for m in latest:
                 tags_str = ", ".join((m.get("tags") or {}).get("genres", []))
                 ver = (m.get("mc_versions") or [None])[0]
-                lines.append(f"- **{m['name_zh']}** ({m.get('name_en', '')}) — {tags_str} — MC {ver} — {m['mcmod_url']}")
+                lines.append(
+                    f"- **{m['name_zh']}** ({m.get('name_en', '')}) — "
+                    f"{tags_str} — MC {ver} — {m['mcmod_url']}"
+                )
             parts.append("\n".join(lines))
         if tool_results.get("modpack"):
             mp = tool_results["modpack"]
@@ -58,7 +64,9 @@ class AnswererAgent:
                 for m in mods:
                     tags_str = ", ".join((m.get("tags") or {}).get("genres", []))
                     ver = (m.get("mc_versions") or [None])[0]
-                    lines.append(f"- {m['name_zh']} ({m.get('name_en', '')}) — {tags_str} — MC {ver}")
+                    lines.append(
+                        f"- {m['name_zh']} ({m.get('name_en', '')}) — {tags_str} — MC {ver}"
+                    )
             if mp.get("compatibility_notes"):
                 lines.append("\n**兼容性提示:**")
                 for note in mp["compatibility_notes"]:
@@ -83,7 +91,9 @@ class AnswererAgent:
                 parts.append("\n".join(lines))
         return "\n\n".join(parts) if parts else "（无可用资料）"
 
-    def answer(self, question: str, chunks: list[Chunk], tool_results: dict | None = None) -> str:
+    def answer(
+        self, question: str, chunks: list[Chunk], tool_results: dict | None = None,
+    ) -> str:
         ctx = self._format_context(chunks, tool_results or {})
         prompt = self._template.format(context=ctx, question=question)
         return self.llm.chat([{"role": "user", "content": prompt}], temperature=0.3)

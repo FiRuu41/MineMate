@@ -1,5 +1,4 @@
 """Test resolve_data_path fallback levels."""
-from pathlib import Path
 
 import pytest
 

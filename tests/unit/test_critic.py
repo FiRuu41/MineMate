@@ -92,7 +92,9 @@ async def test_critic_fails_max_retries():
     fake_answerer = MagicMock()
     fake_answerer.answer.side_effect = ["answer1", "answer2", "answer3"]
     fake_critic = MagicMock()
-    fake_critic.review.return_value = {"pass": False, "reason": "still bad", "suggestion": "fix again"}
+    fake_critic.review.return_value = {
+        "pass": False, "reason": "still bad", "suggestion": "fix again",
+    }
 
     wf = McmodWorkflow(
         router=fake_router, retriever=fake_retriever,

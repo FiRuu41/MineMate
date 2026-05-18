@@ -59,7 +59,6 @@ def curate_modpack(
 
 
 def _find_by_tags(session, themes, mc_version, loader, limit):
-    from sqlalchemy import text
 
     q = session.query(Mod).filter(Mod.tags.isnot(None), Mod.description.isnot(None))
     if loader:
