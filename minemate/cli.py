@@ -149,5 +149,56 @@ def import_data_cmd(zip_path, force):
         raise click.exceptions.Exit(1)
 
 
+@main.command(name="build-index")
+@click.option("--mod", default=None, help="Rebuild only this mod_id")
+def build_index_cmd(mod):
+    """Build/rebuild Chroma vector index from SQLite mods (BGE-M3 embeddings)."""
+    import sys
+    from pipeline.build_index import main as _impl
+    saved_argv = sys.argv
+    sys.argv = ["build_index"] + (["--mod", mod] if mod else [])
+    try:
+        _impl()
+    finally:
+        sys.argv = saved_argv
+
+
+@main.command(name="build-tags")
+@click.option("--workers", type=int, default=10, help="Concurrent LLM calls")
+@click.option("--limit", type=int, default=0, help="Max mods to tag (0=all)")
+@click.option("--yes", "-y", is_flag=True, default=False, help="Skip 5s confirmation countdown")
+def build_tags_cmd(workers, limit, yes):
+    """Tag mods via DeepSeek LLM. WARNING: consumes API tokens."""
+    import sys
+    import time
+
+    if not yes:
+        click.echo(click.style("WARNING:", fg="yellow", bold=True)
+                   + " This will call DeepSeek API for every untagged mod.")
+        click.echo("  Estimated cost: ~$0.01 per 100 mods (~$1.10 for 11000 mods).")
+        click.echo("  Press Ctrl+C within 5s to abort, or use --yes to skip this prompt.")
+        click.echo()
+        try:
+            for i in range(5, 0, -1):
+                click.echo(f"  {i}...", nl=False)
+                time.sleep(1)
+            click.echo(" starting.")
+        except KeyboardInterrupt:
+            click.echo()
+            click.echo(click.style("aborted.", fg="red"))
+            raise click.exceptions.Exit(130)
+
+    from pipeline.tag_mods import main as _impl
+    saved_argv = sys.argv
+    args = ["tag_mods", "--workers", str(workers)]
+    if limit:
+        args += ["--limit", str(limit)]
+    sys.argv = args
+    try:
+        _impl()
+    finally:
+        sys.argv = saved_argv
+
+
 if __name__ == "__main__":
     main()

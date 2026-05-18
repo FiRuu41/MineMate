@@ -103,3 +103,43 @@ def test_import_data_rejects_corrupted_zip(tmp_path):
 
     with pytest.raises(ImportError_, match="corrupted"):
         import_data(bad_zip, dest_db, dest_chroma, force=False, echo=lambda *a: None)
+
+
+def test_build_tags_shows_warning(monkeypatch):
+    """build-tags with --yes should skip countdown and call pipeline.tag_mods.main."""
+    from click.testing import CliRunner
+    import sys
+
+    fake_main_calls = []
+
+    def fake_main():
+        fake_main_calls.append(list(sys.argv))
+
+    monkeypatch.setattr("pipeline.tag_mods.main", fake_main)
+
+    runner = CliRunner()
+    result = runner.invoke(main, ["build-tags", "--yes", "--workers", "5"])
+    assert result.exit_code == 0
+    # --yes should skip the warning
+    assert "WARNING" not in result.output
+    assert len(fake_main_calls) == 1
+    assert "--workers" in fake_main_calls[0]
+    assert "5" in fake_main_calls[0]
+
+
+def test_build_index_passes_mod_arg(monkeypatch):
+    """build-index --mod X should forward to pipeline.build_index.main with --mod X."""
+    import sys
+
+    captured_argv = []
+
+    def fake_main():
+        captured_argv.append(list(sys.argv))
+
+    monkeypatch.setattr("pipeline.build_index.main", fake_main)
+
+    from click.testing import CliRunner
+    runner = CliRunner()
+    result = runner.invoke(main, ["build-index", "--mod", "341"])
+    assert result.exit_code == 0
+    assert captured_argv == [["build_index", "--mod", "341"]]
