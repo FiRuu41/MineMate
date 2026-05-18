@@ -6,6 +6,7 @@ import json
 import time
 
 import gradio as gr
+import random
 
 from agents.answerer import AnswererAgent
 from agents.critic import CriticAgent
@@ -80,6 +81,15 @@ button.secondary {
 """
 
 
+THINKING_PLACEHOLDERS = [
+    "🤔 正在思考...",
+    "🔍 翻阅知识库中...",
+    "⛏️ 挖掘信息...",
+    "📚 查阅模组百科...",
+    "💭 整理回复...",
+]
+
+
 def build_handler() -> ChatHandler:
     workflow = McmodWorkflow(
         router=RouterAgent(),
@@ -132,14 +142,24 @@ def main() -> None:
     handler = build_handler()
 
     async def respond(message: str, history: list, conv_id: str):
+        """Two-phase async generator: yield placeholder, then yield real answer."""
         if not message.strip():
-            return "", history, "", conv_id, _build_radio()
-        answer, debug = await handler.chat(message)
+            yield "", history, "", conv_id, _build_radio()
+            return
+
+        # Phase 1: append user + thinking placeholder, yield immediately
         history.append({"role": "user", "content": message})
-        history.append({"role": "assistant", "content": answer})
+        placeholder = random.choice(THINKING_PLACEHOLDERS)
+        history.append({"role": "assistant", "content": placeholder})
+        yield "", history, "", conv_id, gr.skip()
+
+        # Phase 2: do the actual work + yield real answer
+        answer, debug = await handler.chat(message)
+        history[-1] = {"role": "assistant", "content": answer}
+
         title = history[0]["content"][:40] if history else "新对话"
         _save_conv(conv_id, history, title)
-        return "", history, debug, conv_id, _build_radio()
+        yield "", history, debug, conv_id, _build_radio()
 
     STEVE_AVATAR = "https://minotar.net/helm/Steve/64.png"
     BOT_AVATAR = "https://minotar.net/helm/GrassBlock/64.png"
