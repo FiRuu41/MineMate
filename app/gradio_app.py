@@ -3,11 +3,11 @@ import os
 os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 
 import json
+import random
 import time
 import traceback
 
 import gradio as gr
-import random
 from loguru import logger
 
 from agents.answerer import AnswererAgent
