@@ -27,3 +27,29 @@ def test_resolved_sqlite_path_respects_absolute(monkeypatch):
     monkeypatch.setenv("SQLITE_PATH", "/tmp/custom.db")
     s = Settings(_env_file=None)
     assert str(s.resolved_sqlite_path).replace("\\", "/").endswith("/tmp/custom.db")
+
+
+def test_collect_env_files_includes_home_minemate(monkeypatch):
+    """_collect_env_files should always include ~/.minemate/.env."""
+    from pathlib import Path
+    from config.settings import _collect_env_files
+
+    monkeypatch.delenv("MINEMATE_HOME", raising=False)
+    files = _collect_env_files()
+    assert ".env" in files  # CWD
+    assert str(Path.home() / ".minemate" / ".env") in files
+
+
+def test_collect_env_files_with_minemate_home(monkeypatch, tmp_path):
+    """When MINEMATE_HOME is set, $MINEMATE_HOME/.env appears before ~/.minemate/.env."""
+    from pathlib import Path
+    from config.settings import _collect_env_files
+
+    monkeypatch.setenv("MINEMATE_HOME", str(tmp_path))
+    files = _collect_env_files()
+    custom = f"{tmp_path}/.env"
+    home_default = str(Path.home() / ".minemate" / ".env")
+    assert custom in files
+    assert home_default in files
+    # Custom env should come before the home default (higher precedence)
+    assert files.index(custom) < files.index(home_default)

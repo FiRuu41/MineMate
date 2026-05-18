@@ -3,8 +3,31 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def _collect_env_files() -> tuple[str, ...]:
+    """Collect .env candidate paths. Pydantic-settings honors earlier entries first.
+
+    Priority (high to low):
+    1. OS environment variables (pydantic-settings default behavior)
+    2. CWD .env (dev mode)
+    3. $MINEMATE_HOME/.env (user-customized location)
+    4. ~/.minemate/.env (pipx default)
+    """
+    import os
+    from pathlib import Path
+    files = [".env"]  # CWD (dev mode)
+    home_env = os.environ.get("MINEMATE_HOME")
+    if home_env:
+        files.append(f"{home_env}/.env")
+    files.append(str(Path.home() / ".minemate" / ".env"))
+    return tuple(files)
+
+
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=_collect_env_files(),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     # DeepSeek
     deepseek_api_key: str
