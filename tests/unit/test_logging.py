@@ -10,8 +10,4 @@ def test_new_trace_id_sets_contextvar():
 def test_setup_logging_runs(tmp_path, monkeypatch):
     monkeypatch.setenv("LOG_DIR", str(tmp_path))
     monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test")
-    monkeypatch.setenv("MYSQL_HOST", "h")
-    monkeypatch.setenv("MYSQL_USER", "u")
-    monkeypatch.setenv("MYSQL_PASSWORD", "p")
-    monkeypatch.setenv("MYSQL_DB", "d")
     setup_logging()

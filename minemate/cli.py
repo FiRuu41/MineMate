@@ -71,26 +71,49 @@ def start():
 
 @main.command()
 def status():
-    """Show system status: Docker, MySQL, Qdrant, mod count."""
+    """Show system status: data files, model cache, mod counts."""
+    from config.settings import settings
+    from pathlib import Path
+    import os
+
     click.echo("=== MineMate Status ===")
-    # Docker
-    import subprocess
-    r = subprocess.run(["docker", "ps", "--format", "{{.Names}} {{.Status}}"], capture_output=True, text=True)
-    has_mysql = "mcmod-mysql" in r.stdout
-    has_qdrant = "mcmod-qdrant" in r.stdout
-    click.echo(f"  Docker:  {'OK' if (has_mysql and has_qdrant) else 'MISSING SERVICES'}")
-    click.echo(f"  MySQL:   {'Up' if has_mysql else 'Down'}")
-    click.echo(f"  Qdrant:  {'Up' if has_qdrant else 'Down'}")
+
+    # SQLite
+    db = settings.resolved_sqlite_path
+    if db.exists():
+        size_mb = db.stat().st_size / 1024 / 1024
+        click.echo(f"  SQLite:  {click.style('OK', fg='green')}  {db} ({size_mb:.1f} MB)")
+    else:
+        click.echo(f"  SQLite:  {click.style('MISSING', fg='yellow')}  expected at {db}")
+
+    # Chroma
+    chroma = settings.resolved_chroma_path
+    chroma_db = chroma / "chroma.sqlite3"
+    if chroma_db.exists():
+        size_mb = chroma_db.stat().st_size / 1024 / 1024
+        click.echo(f"  Chroma:  {click.style('OK', fg='green')}  {chroma} ({size_mb:.1f} MB)")
+    else:
+        click.echo(f"  Chroma:  {click.style('MISSING', fg='yellow')}  expected at {chroma}")
+
+    # BGE-M3 cache (HuggingFace)
+    hf_home = os.environ.get("HF_HOME") or settings.hf_home or str(Path.home() / ".cache" / "huggingface")
+    bge_dir = Path(hf_home) / "hub" / "models--BAAI--bge-m3"
+    if bge_dir.exists():
+        click.echo(f"  BGE-M3:  {click.style('OK', fg='green')}  cached at {bge_dir}")
+    else:
+        click.echo(f"  BGE-M3:  {click.style('MISSING', fg='yellow')}  will download on first run")
 
     # API key
     try:
-        from config.settings import settings
         key = settings.deepseek_api_key
-        click.echo(f"  API key: {'Set' if key and len(key) > 10 else 'MISSING'}")
+        if key and key != "sk-xxx" and len(key) > 10:
+            click.echo(f"  API key: {click.style('OK', fg='green')}")
+        else:
+            click.echo(f"  API key: {click.style('MISSING', fg='yellow')}")
     except Exception:
-        click.echo(f"  API key: MISSING")
+        click.echo(f"  API key: {click.style('MISSING', fg='red')}")
 
-    # Mod count
+    # Mod / tag counts
     try:
         from pipeline.storage.db import SessionLocal
         from sqlalchemy import text
@@ -98,8 +121,8 @@ def status():
             n = s.execute(text("SELECT COUNT(*) FROM mods")).scalar()
             tagged = s.execute(text("SELECT COUNT(*) FROM mods WHERE tags IS NOT NULL")).scalar()
         click.echo(f"  Mods:    {n} total, {tagged} tagged")
-    except Exception:
-        click.echo(f"  Mods:    (cannot connect to MySQL)")
+    except Exception as e:
+        click.echo(f"  Mods:    {click.style('cannot connect', fg='red')} ({e})")
 
 
 if __name__ == "__main__":

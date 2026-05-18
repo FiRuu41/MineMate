@@ -8,7 +8,7 @@ from llm.embeddings import get_embedder
 
 class ChromaRetriever:
     def __init__(self, embedder=None, collection: str = None):
-        self.collection_name = collection or settings.qdrant_collection
+        self.collection_name = collection or settings.chroma_collection
         self.embedder = embedder or get_embedder()
         self._client = chromadb.PersistentClient(
             path=settings.chroma_path,
