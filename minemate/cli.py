@@ -125,5 +125,29 @@ def status():
         click.echo(f"  Mods:    {click.style('cannot connect', fg='red')} ({e})")
 
 
+@main.command(name="import-data")
+@click.argument("zip_path", type=click.Path(exists=True, dir_okay=False, path_type=__import__("pathlib").Path))
+@click.option("--force", is_flag=True, default=False, help="Overwrite existing data at destination")
+def import_data_cmd(zip_path, force):
+    """Import a minemate-data zip into local SQLite + Chroma paths."""
+    from config.settings import settings
+    from scripts.import_data import import_data, ImportError_
+
+    try:
+        import_data(
+            zip_path,
+            settings.resolved_sqlite_path,
+            settings.resolved_chroma_path,
+            force=force,
+            echo=click.echo,
+        )
+        click.echo()
+        click.echo(click.style("Import complete. Run 'minemate start' to launch.", fg="green"))
+    except ImportError_ as e:
+        click.echo()
+        click.echo(click.style(f"ERROR: {e}", fg="red"), err=True)
+        raise click.exceptions.Exit(1)
+
+
 if __name__ == "__main__":
     main()
