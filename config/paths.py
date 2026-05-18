@@ -3,14 +3,14 @@ import os
 from pathlib import Path
 
 
-def resolve_data_path(setting_value: str, *, fallback_subdir: str) -> Path:
+def resolve_data_path(setting_value: str) -> Path:
     """
     解析顺序：
     1. 绝对路径 → 直接用
     2. 相对路径 + MINEMATE_HOME 已设 → $MINEMATE_HOME / setting_value
     3. 相对路径 + CWD 是项目根（pyproject.toml + minemate/）→ CWD / setting_value
     4. 相对路径 + 源码在工作区内（editable install）→ 沿 __file__.parents 找到项目根
-    5. 否则 → ~/.minemate / fallback_subdir / setting_value
+    5. 否则 → ~/.minemate / setting_value
     """
     if not setting_value:
         raise ValueError("setting_value must be non-empty")
@@ -31,4 +31,4 @@ def resolve_data_path(setting_value: str, *, fallback_subdir: str) -> Path:
         if (parent / "pyproject.toml").exists() and (parent / "minemate").is_dir():
             return parent / setting_value
 
-    return Path.home() / ".minemate" / fallback_subdir / setting_value
+    return Path.home() / ".minemate" / setting_value

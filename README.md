@@ -51,18 +51,22 @@ pip install --user pipx
 # 一行装好 minemate
 pipx install minemate
 
-# 装 Playwright Chromium（首次必须，~130 MB）
-pipx runpip minemate run playwright install chromium
+# 装 Chromium（绕过 mcmod 反爬，~130 MB）
+minemate install-chromium
 
-# 设环境变量 + 把数据导入到 ~/.minemate/
-# DEEPSEEK_API_KEY=sk-xxx  (.env in current dir OR system env var)
-minemate import-data minemate-data-XXX.zip   # 数据包私下问作者要
+# 配置 API key（交互式，从 https://platform.deepseek.com 拿）
+minemate setup
 
-minemate setup    # 4 项诊断
+# 数据包私下问作者要
+minemate import-data minemate-data-XXX.zip
+
 minemate start    # 启动 Web UI -> http://127.0.0.1:7860
 ```
 
-适合：只想用 MineMate、不打算改代码的朋友。**配置文件位置**：pipx 装的版本默认数据走 `~/.minemate/`；如需自定义，设环境变量 `MINEMATE_HOME=/your/path`。
+数据默认存到 `~/.minemate/`（可通过环境变量 `MINEMATE_HOME=/your/path` 自定义）。
+API key 默认写到 `~/.minemate/.env`，从任何目录跑 minemate 都能读到。
+
+适合：只想用 MineMate、不打算改代码的朋友。
 
 ### 1. 从源码安装（开发者）
 

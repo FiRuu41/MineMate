@@ -3,8 +3,31 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def _collect_env_files() -> tuple[str, ...]:
+    """Collect .env candidate paths. Pydantic-settings honors earlier entries first.
+
+    Priority (high to low):
+    1. OS environment variables (pydantic-settings default behavior)
+    2. CWD .env (dev mode)
+    3. $MINEMATE_HOME/.env (user-customized location)
+    4. ~/.minemate/.env (pipx default)
+    """
+    import os
+    from pathlib import Path
+    files = [".env"]  # CWD (dev mode)
+    home_env = os.environ.get("MINEMATE_HOME")
+    if home_env:
+        files.append(f"{home_env}/.env")
+    files.append(str(Path.home() / ".minemate" / ".env"))
+    return tuple(files)
+
+
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=_collect_env_files(),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     # DeepSeek
     deepseek_api_key: str
@@ -13,7 +36,7 @@ class Settings(BaseSettings):
 
     chroma_collection: str = "mcmod_v1"
 
-    sqlite_path: str = "minemate.db"
+    sqlite_path: str = "db/minemate.db"
     chroma_path: str = "chroma"
 
     # Embedding
@@ -47,27 +70,27 @@ class Settings(BaseSettings):
 
     # App
     log_level: str = "INFO"
-    log_dir: str = "data/logs"
+    log_dir: str = "logs"
 
     @property
     def resolved_sqlite_path(self) -> Path:
         from config.paths import resolve_data_path
-        return resolve_data_path(self.sqlite_path, fallback_subdir="db")
+        return resolve_data_path(self.sqlite_path)
 
     @property
     def resolved_chroma_path(self) -> Path:
         from config.paths import resolve_data_path
-        return resolve_data_path(self.chroma_path, fallback_subdir="chroma")
+        return resolve_data_path(self.chroma_path)
 
     @property
     def resolved_conv_dir(self) -> Path:
         from config.paths import resolve_data_path
-        return resolve_data_path(f"{self.data_dir}/conversations", fallback_subdir="conversations")
+        return resolve_data_path(f"{self.data_dir}/conversations")
 
     @property
     def resolved_log_dir(self) -> Path:
         from config.paths import resolve_data_path
-        return resolve_data_path(self.log_dir, fallback_subdir="logs")
+        return resolve_data_path(self.log_dir)
 
 
 settings = Settings()
