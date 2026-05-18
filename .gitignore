@@ -27,3 +27,8 @@ scripts/_remigrate.py
 
 # Phase 0: dev-only scripts for personal data packaging
 scripts/dev/
+
+# Python build artifacts
+dist/
+build/
+*.egg-info/
