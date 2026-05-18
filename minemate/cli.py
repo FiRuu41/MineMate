@@ -11,6 +11,25 @@ if _cwd not in sys.path:
 import click
 
 
+def _write_env_var(env_path, key: str, value: str) -> None:
+    """Idempotently write KEY=value to .env, replacing existing line if any."""
+    from pathlib import Path
+    env_path = Path(env_path)
+    if env_path.exists():
+        lines = env_path.read_text(encoding="utf-8").splitlines()
+        replaced = False
+        for i, line in enumerate(lines):
+            if line.startswith(f"{key}="):
+                lines[i] = f"{key}={value}"
+                replaced = True
+                break
+        if not replaced:
+            lines.append(f"{key}={value}")
+        env_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    else:
+        env_path.write_text(f"{key}={value}\n", encoding="utf-8")
+
+
 @click.group()
 def main():
     """MineMate — Your AI buddy for Minecraft mods."""
@@ -19,30 +38,55 @@ def main():
 
 @main.command()
 def setup():
-    """Diagnose setup status: API key / data / Playwright / BGE-M3 model."""
+    """诊断 MineMate 设置：API key / 数据 / Playwright / BGE-M3。"""
     import os
     from pathlib import Path
     from config.settings import settings
 
-    click.echo("╔══════════════════════════╗")
-    click.echo("║   MineMate Setup Wizard  ║")
-    click.echo("╚══════════════════════════╝")
+    click.echo("========================================")
+    click.echo("   MineMate Setup Wizard")
+    click.echo("========================================")
+    click.echo()
+
+    # Install mode detection
+    try:
+        import minemate as _m
+        install_mode = "PyPI" if "site-packages" in str(Path(_m.__file__).parent) else "源码（开发）"
+    except Exception:
+        install_mode = "未知"
+    click.echo(f"安装模式: {install_mode}")
     click.echo()
 
     issues = []
 
     # [1/4] DeepSeek API key
     click.echo("[1/4] DeepSeek API key ...                   ", nl=False)
+    key_ok = False
     try:
         key = settings.deepseek_api_key
-        if key and key != "sk-xxx" and len(key) > 10:
-            click.echo(click.style("OK", fg="green"))
-        else:
-            click.echo(click.style("MISSING", fg="yellow"))
-            issues.append("Edit .env and set DEEPSEEK_API_KEY=sk-your-key")
+        key_ok = bool(key and key != "sk-xxx" and len(key) > 10)
     except Exception:
-        click.echo(click.style("MISSING", fg="red"))
-        issues.append("Copy .env.example to .env and set DEEPSEEK_API_KEY")
+        pass
+
+    if key_ok:
+        click.echo(click.style("OK", fg="green"))
+    else:
+        click.echo(click.style("MISSING", fg="yellow"))
+        env_target = Path.home() / ".minemate" / ".env"
+        if click.confirm("       现在配置吗？", default=True):
+            new_key = click.prompt(
+                "       粘贴 API key（前缀 sk-，从 https://platform.deepseek.com 获取）",
+                hide_input=True,
+            ).strip()
+            if new_key.startswith("sk-") and len(new_key) > 10:
+                env_target.parent.mkdir(parents=True, exist_ok=True)
+                _write_env_var(env_target, "DEEPSEEK_API_KEY", new_key)
+                click.echo(click.style(f"       已保存到 {env_target}", fg="green"))
+            else:
+                click.echo(click.style("       无效的 API key（应以 sk- 开头），已跳过", fg="red"))
+                issues.append(f"API key：编辑 {env_target}，添加 DEEPSEEK_API_KEY=sk-...")
+        else:
+            issues.append(f"API key：编辑 {env_target}，添加 DEEPSEEK_API_KEY=sk-...")
 
     # [2/4] Data files
     click.echo("[2/4] Data files ...                         ", nl=False)
@@ -54,15 +98,13 @@ def setup():
             conn = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
             n = conn.execute("SELECT COUNT(*) FROM mods").fetchone()[0]
             conn.close()
-            click.echo(click.style(f"OK ({n} mods)", fg="green"))
+            click.echo(click.style(f"OK ({n} 个模组)", fg="green"))
         except Exception:
-            click.echo(click.style("PARTIAL (db unreadable)", fg="yellow"))
-            issues.append(f"SQLite at {db} appears corrupted")
+            click.echo(click.style("部分（数据库无法读取）", fg="yellow"))
+            issues.append(f"数据库似乎损坏：{db}")
     else:
         click.echo(click.style("MISSING", fg="yellow"))
-        issues.append(
-            "Get a data zip from the author and run: minemate import-data <zip>"
-        )
+        issues.append("数据：找作者要 minemate-data-XXX.zip 然后跑: minemate import-data <zip>")
 
     # [3/4] Playwright Chromium
     click.echo("[3/4] Playwright Chromium ...                ", nl=False)
@@ -87,7 +129,7 @@ def setup():
         click.echo(click.style("OK", fg="green"))
     else:
         click.echo(click.style("MISSING", fg="yellow"))
-        issues.append("Run: uv run playwright install chromium")
+        issues.append("Chromium：minemate install-chromium")
 
     # [4/4] BGE-M3 model
     click.echo("[4/4] BGE-M3 model ...                       ", nl=False)
@@ -99,15 +141,13 @@ def setup():
         click.echo(click.style("OK", fg="green"))
     else:
         click.echo(click.style("MISSING", fg="yellow"))
-        issues.append(
-            "BGE-M3 model will auto-download on first 'minemate start' (~2.3 GB)"
-        )
+        issues.append("BGE-M3 模型：首次 minemate start 时自动下载（约 2.3 GB）")
 
     click.echo()
     if not issues:
-        click.echo(click.style("Setup complete. Run 'minemate start' to launch.", fg="green"))
+        click.echo(click.style("设置完成。运行 'minemate start' 启动。", fg="green"))
     else:
-        click.echo(click.style("Setup incomplete:", fg="yellow"))
+        click.echo(click.style("需要修复:", fg="yellow"))
         for i, msg in enumerate(issues, 1):
             click.echo(f"  {i}. {msg}")
 

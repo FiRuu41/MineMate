@@ -134,18 +134,20 @@ def test_build_index_passes_mod_arg(monkeypatch):
 
 
 def test_setup_reports_4_stages(monkeypatch):
-    """setup should print 4 numbered checks and exit 0 regardless of MISSING items."""
+    """setup should print install mode + 4 numbered checks and exit 0."""
     from click.testing import CliRunner
     monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test-with-enough-length")
 
     runner = CliRunner()
-    result = runner.invoke(main, ["setup"])
+    # Provide stdin in case the interactive prompt triggers (shouldn't, since env is set)
+    result = runner.invoke(main, ["setup"], input="\n")
     assert result.exit_code == 0
+    assert "MineMate Setup Wizard" in result.output
+    assert "安装模式:" in result.output
     assert "[1/4]" in result.output
     assert "[2/4]" in result.output
     assert "[3/4]" in result.output
     assert "[4/4]" in result.output
-    assert "Setup Wizard" in result.output
 
 
 def test_install_chromium_invokes_playwright(monkeypatch):
@@ -165,3 +167,43 @@ def test_install_chromium_invokes_playwright(monkeypatch):
     assert result.exit_code == 0
     assert "Chromium 安装完成" in result.output
     assert captured_argv == [["playwright", "install", "chromium"]]
+
+
+def test_write_env_var_idempotent(tmp_path):
+    """_write_env_var should overwrite existing line, not append duplicate."""
+    from minemate.cli import _write_env_var
+
+    env_file = tmp_path / ".env"
+    env_file.write_text("FOO=1\nBAR=2\n", encoding="utf-8")
+
+    _write_env_var(env_file, "FOO", "999")
+    content = env_file.read_text(encoding="utf-8")
+    assert "FOO=999" in content
+    assert "FOO=1" not in content
+    assert "BAR=2" in content
+
+    _write_env_var(env_file, "NEW", "added")
+    content = env_file.read_text(encoding="utf-8")
+    assert "NEW=added" in content
+    assert "FOO=999" in content
+
+
+def test_setup_interactive_writes_api_key(monkeypatch, tmp_path):
+    """When API key missing, setup should prompt and write to ~/.minemate/.env."""
+    from click.testing import CliRunner
+
+    # Make HOME point to tmp_path so writes don't affect real home
+    monkeypatch.setattr("pathlib.Path.home", lambda: tmp_path)
+
+    # Force API key to be missing: set the pydantic field on the instance to sentinel
+    from config.settings import settings as _settings
+    monkeypatch.setattr(_settings, "deepseek_api_key", "sk-xxx")
+
+    runner = CliRunner()
+    # Provide: confirm "Y\n" (default), then paste fake key "sk-validkey1234567890\n"
+    result = runner.invoke(main, ["setup"], input="\nsk-validkey1234567890\n")
+    assert result.exit_code == 0
+    expected_env = tmp_path / ".minemate" / ".env"
+    assert expected_env.exists(), f"Expected env file at {expected_env}"
+    content = expected_env.read_text(encoding="utf-8")
+    assert "DEEPSEEK_API_KEY=sk-validkey1234567890" in content
