@@ -3,9 +3,12 @@ import os
 os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 
 import json
+import random
 import time
+import traceback
 
 import gradio as gr
+from loguru import logger
 
 from agents.answerer import AnswererAgent
 from agents.critic import CriticAgent
@@ -80,6 +83,27 @@ button.secondary {
 """
 
 
+THINKING_PLACEHOLDERS = [
+    "🤔 正在思考...",
+    "🔍 翻阅知识库中...",
+    "⛏️ 挖掘信息...",
+    "📚 查阅模组百科...",
+    "💭 整理回复...",
+]
+
+
+def _classify_error(exc: Exception) -> str:
+    """Map exception to user-friendly Chinese message."""
+    err_str = (str(exc) or "").lower()
+    if "deepseek" in err_str or "openai" in err_str or "api" in err_str:
+        return "🚧 LLM 服务暂时不可达，请稍后重试或检查 API key 配置。"
+    if "connection" in err_str or "timeout" in err_str or "network" in err_str:
+        return "🌐 网络异常，请检查连接后重试。"
+    if "mcmod" in err_str:
+        return "🕷️ mcmod.cn 暂时无法访问（可能反爬或网络问题），稍后再试。"
+    return f"⚠️ 发生未知错误：{type(exc).__name__}。详情见调试折叠。"
+
+
 def build_handler() -> ChatHandler:
     workflow = McmodWorkflow(
         router=RouterAgent(),
@@ -132,14 +156,30 @@ def main() -> None:
     handler = build_handler()
 
     async def respond(message: str, history: list, conv_id: str):
+        """Two-phase async generator: yield placeholder, then yield real answer."""
         if not message.strip():
-            return "", history, "", conv_id, _build_radio()
-        answer, debug = await handler.chat(message)
+            yield "", history, "", conv_id, _build_radio()
+            return
+
+        # Phase 1: append user + thinking placeholder, yield immediately
         history.append({"role": "user", "content": message})
-        history.append({"role": "assistant", "content": answer})
+        placeholder = random.choice(THINKING_PLACEHOLDERS)
+        history.append({"role": "assistant", "content": placeholder})
+        yield "", history, "", conv_id, gr.skip()
+
+        # Phase 2: do the actual work, with error handling
+        try:
+            answer, debug = await handler.chat(message)
+            history[-1] = {"role": "assistant", "content": answer}
+        except Exception as e:
+            user_msg = _classify_error(e)
+            history[-1] = {"role": "assistant", "content": user_msg}
+            debug = f"ERROR: {type(e).__name__}\n{traceback.format_exc()}"
+            logger.exception("respond failed")
+
         title = history[0]["content"][:40] if history else "新对话"
         _save_conv(conv_id, history, title)
-        return "", history, debug, conv_id, _build_radio()
+        yield "", history, debug, conv_id, _build_radio()
 
     STEVE_AVATAR = "https://minotar.net/helm/Steve/64.png"
     BOT_AVATAR = "https://minotar.net/helm/GrassBlock/64.png"
