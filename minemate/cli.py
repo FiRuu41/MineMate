@@ -19,46 +19,97 @@ def main():
 
 @main.command()
 def setup():
-    """First-time setup wizard: check environment, init DB, guide data import."""
+    """Diagnose setup status: API key / data / Playwright / BGE-M3 model."""
+    import os
+    from pathlib import Path
+    from config.settings import settings
+
     click.echo("╔══════════════════════════╗")
     click.echo("║   MineMate Setup Wizard  ║")
     click.echo("╚══════════════════════════╝")
     click.echo()
 
-    import subprocess
+    issues = []
 
-    from config.settings import settings as _s
-    # 1. Check API key
-    click.echo("[1/2] Checking DeepSeek API key ... ", nl=False)
+    # [1/4] DeepSeek API key
+    click.echo("[1/4] DeepSeek API key ...                   ", nl=False)
     try:
-        from config.settings import settings
         key = settings.deepseek_api_key
         if key and key != "sk-xxx" and len(key) > 10:
             click.echo(click.style("OK", fg="green"))
         else:
             click.echo(click.style("MISSING", fg="yellow"))
-            click.echo("  Edit .env file and set DEEPSEEK_API_KEY=sk-your-key")
-    except Exception as e:
-        click.echo(click.style("MISSING", fg="yellow"))
-        click.echo(f"  Copy .env.example to .env and fill in DEEPSEEK_API_KEY")
+            issues.append("Edit .env and set DEEPSEEK_API_KEY=sk-your-key")
+    except Exception:
+        click.echo(click.style("MISSING", fg="red"))
+        issues.append("Copy .env.example to .env and set DEEPSEEK_API_KEY")
 
-    # 2. Init DB
-    click.echo("[2/2] Initializing database (SQLite) ... ", nl=False)
-    r = subprocess.run([sys.executable, "-m", "scripts.init_db"], capture_output=True, text=True)
-    if r.returncode == 0:
+    # [2/4] Data files
+    click.echo("[2/4] Data files ...                         ", nl=False)
+    db = settings.resolved_sqlite_path
+    chroma = settings.resolved_chroma_path
+    if db.exists() and (chroma / "chroma.sqlite3").exists():
+        try:
+            import sqlite3
+            conn = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+            n = conn.execute("SELECT COUNT(*) FROM mods").fetchone()[0]
+            conn.close()
+            click.echo(click.style(f"OK ({n} mods)", fg="green"))
+        except Exception:
+            click.echo(click.style("PARTIAL (db unreadable)", fg="yellow"))
+            issues.append(f"SQLite at {db} appears corrupted")
+    else:
+        click.echo(click.style("MISSING", fg="yellow"))
+        issues.append(
+            "Get a data zip from the author and run: minemate import-data <zip>"
+        )
+
+    # [3/4] Playwright Chromium
+    click.echo("[3/4] Playwright Chromium ...                ", nl=False)
+    pw_path = settings.playwright_browsers_path or os.environ.get(
+        "PLAYWRIGHT_BROWSERS_PATH", ""
+    )
+    has_chromium = False
+    if pw_path:
+        pw_dir = Path(pw_path)
+        if pw_dir.exists():
+            has_chromium = any(
+                p.name.startswith("chromium") for p in pw_dir.iterdir() if p.is_dir()
+            )
+    else:
+        default_dir = Path.home() / "AppData" / "Local" / "ms-playwright"
+        if default_dir.exists():
+            has_chromium = any(
+                p.name.startswith("chromium") for p in default_dir.iterdir() if p.is_dir()
+            )
+
+    if has_chromium:
         click.echo(click.style("OK", fg="green"))
     else:
-        click.echo(click.style("FAIL", fg="red"))
-        click.echo(f"  {r.stderr}")
+        click.echo(click.style("MISSING", fg="yellow"))
+        issues.append("Run: uv run playwright install chromium")
+
+    # [4/4] BGE-M3 model
+    click.echo("[4/4] BGE-M3 model ...                       ", nl=False)
+    hf_home = os.environ.get("HF_HOME") or settings.hf_home or str(
+        Path.home() / ".cache" / "huggingface"
+    )
+    bge_dir = Path(hf_home) / "hub" / "models--BAAI--bge-m3"
+    if bge_dir.exists():
+        click.echo(click.style("OK", fg="green"))
+    else:
+        click.echo(click.style("MISSING", fg="yellow"))
+        issues.append(
+            "BGE-M3 model will auto-download on first 'minemate start' (~2.3 GB)"
+        )
 
     click.echo()
-    click.echo("  MineMate does NOT include mod data. You need to provide it.")
-    click.echo("  Import mod data into MySQL table 'mods' with columns:")
-    click.echo("    mod_id, name_zh, name_en, mcmod_url, loader, mc_versions, author, description")
-    click.echo()
-    click.echo("  Optional: run 'minemate build-index' and 'minemate build-tags' after importing data.")
-    click.echo()
-    click.echo(click.style("Setup complete! Run 'minemate start' to launch.", fg="green"))
+    if not issues:
+        click.echo(click.style("Setup complete. Run 'minemate start' to launch.", fg="green"))
+    else:
+        click.echo(click.style("Setup incomplete:", fg="yellow"))
+        for i, msg in enumerate(issues, 1):
+            click.echo(f"  {i}. {msg}")
 
 
 @main.command()

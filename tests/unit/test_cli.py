@@ -20,18 +20,6 @@ def test_status_fails_without_env():
     assert "MineMate Status" in result.output
 
 
-def test_setup_detects_no_docker():
-    """setup should fail early if docker not available."""
-    import shutil
-    if shutil.which("docker"):
-        # Docker IS available - can't test this failure path
-        return
-    runner = CliRunner()
-    result = runner.invoke(main, ["setup"])
-    assert result.exit_code == 1
-    assert "Docker" in result.output
-
-
 def _make_test_zip(tmp_path, mod_count=1):
     """Helper: build a tiny valid minemate-data zip for tests."""
     import json, sqlite3, zipfile
@@ -143,3 +131,18 @@ def test_build_index_passes_mod_arg(monkeypatch):
     result = runner.invoke(main, ["build-index", "--mod", "341"])
     assert result.exit_code == 0
     assert captured_argv == [["build_index", "--mod", "341"]]
+
+
+def test_setup_reports_4_stages(monkeypatch):
+    """setup should print 4 numbered checks and exit 0 regardless of MISSING items."""
+    from click.testing import CliRunner
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test-with-enough-length")
+
+    runner = CliRunner()
+    result = runner.invoke(main, ["setup"])
+    assert result.exit_code == 0
+    assert "[1/4]" in result.output
+    assert "[2/4]" in result.output
+    assert "[3/4]" in result.output
+    assert "[4/4]" in result.output
+    assert "Setup Wizard" in result.output
