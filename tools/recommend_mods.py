@@ -1,89 +1,65 @@
+"""Mod recommendation by tag matching. Works with both SQLite and MySQL."""
 from loguru import logger
 from sqlalchemy import text
 
 from pipeline.storage.db import SessionLocal
+from pipeline.storage.models import Mod
 
 
 def recommend_mods_with_session(session, *, tags: list[str], mc_version: str | None = None,
                                 loader: str | None = None, top_k: int = 5,
                                 exclude_ids: list[str] | None = None) -> list[dict]:
+    """Tag-based mod recommendation using in-memory Python matching.
+
+    Avoids MySQL-specific JSON functions — works with both SQLite and MySQL.
+    """
     if not tags:
         return []
-    conds = ["m.tags IS NOT NULL"]
-    params: dict = {"taglist": tuple(tags), "limit": top_k}
-    if exclude_ids:
-        # MySQL: exclude specific mod_ids
-        placeholders = ", ".join(f":ex_{i}" for i in range(len(exclude_ids)))
-        conds.append(f"m.mod_id NOT IN ({placeholders})")
-        for i, mid in enumerate(exclude_ids):
-            params[f"ex_{i}"] = mid
-    if mc_version:
-        conds.append("JSON_CONTAINS(m.mc_versions, :mcver)")
-        params["mcver"] = f'"{mc_version}"'
-    if loader:
-        conds.append("m.loader LIKE :ldr")
-        params["ldr"] = f"%{loader}%"
-    where = " AND ".join(conds)
-
-    # MySQL JSON_TABLE – compatible; for SQLite tests we use a simpler fallback
-    try:
-        sql = text(f"""
-            SELECT m.mod_id, m.name_zh, m.name_en, m.mcmod_url, m.tags, m.description,
-                   (SELECT COUNT(*) FROM JSON_TABLE(
-                       JSON_EXTRACT(m.tags, '$.genres'), '$[*]' COLUMNS(v VARCHAR(64) PATH '$')
-                   ) t WHERE t.v IN :taglist
-                   ) AS score
-            FROM mods m
-            WHERE {where}
-            HAVING score > 0
-            ORDER BY score DESC
-            LIMIT :limit
-        """)
-        rows = session.execute(sql, params).fetchall()
-    except Exception:
-        logger.exception("MySQL JSON_TABLE failed, trying in-memory fallback")
-        rows = _fallback_search(session, tags, mc_version, loader, top_k)
-
-    result = []
-    for r in rows:
-        tags_val = r.tags
-        if isinstance(tags_val, str):
-            import json
-            try:
-                tags_val = json.loads(tags_val)
-            except (json.JSONDecodeError, TypeError):
-                tags_val = {}
-        result.append({
-            "mod_id": r.mod_id,
-            "name_zh": r.name_zh,
-            "name_en": r.name_en,
-            "mcmod_url": r.mcmod_url,
-            "tags": tags_val or {},
-            "description": (r.description or "")[:200],
-            "match_score": r.score if hasattr(r, "score") else 1,
-        })
-    return result
-
-
-def _fallback_search(session, tags, mc_version, loader, top_k):
-    """In-memory tag matching (works on SQLite for tests)."""
-    from pipeline.storage.models import Mod
 
     q = session.query(Mod).filter(Mod.tags.isnot(None))
+    if loader:
+        q = q.filter(Mod.loader.contains(loader))
     rows = q.all()
+
     scored = []
     for m in rows:
         if not m.tags or "genres" not in m.tags:
             continue
-        if mc_version and mc_version not in (m.mc_versions or []):
+        if exclude_ids and m.mod_id in exclude_ids:
             continue
-        if loader and loader.lower() not in (m.loader or "").lower():
-            continue
-        score = sum(1 for t in tags if t in m.tags.get("genres", []))
-        if score > 0:
-            scored.append((score, m))
+        if mc_version:
+            versions = m.mc_versions or []
+            if mc_version not in versions:
+                continue
+
+        genres = m.tags.get("genres", [])
+        if not isinstance(genres, list):
+            genres = [genres] if genres else []
+
+        match_count = sum(1 for t in tags if t in genres)
+        if match_count > 0:
+            scored.append((match_count, m))
+
     scored.sort(key=lambda x: -x[0])
-    return [m for _, m in scored[:top_k]]
+    result = []
+    for _, m in scored[:top_k]:
+        tags_val = m.tags
+        if isinstance(tags_val, str):
+            import json
+            try:
+                tags_val = json.loads(tags_val)
+            except Exception:
+                tags_val = {}
+        result.append({
+            "mod_id": m.mod_id,
+            "name_zh": m.name_zh,
+            "name_en": m.name_en,
+            "mcmod_url": m.mcmod_url,
+            "tags": tags_val,
+            "description": (m.description or "")[:200],
+            "match_score": getattr(m, "score", 1),
+        })
+    return result
 
 
 def recommend_mods(tags: list[str], mc_version: str | None = None,

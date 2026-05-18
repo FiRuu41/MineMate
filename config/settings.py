@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,23 +11,10 @@ class Settings(BaseSettings):
     deepseek_base_url: str = "https://api.deepseek.com"
     deepseek_model: str = "deepseek-chat"
 
-    # MySQL
-    mysql_host: str = "127.0.0.1"
-    mysql_port: int = 3306
-    mysql_user: str = "mcmod"
-    mysql_password: str = "mcmod_pwd"
-    mysql_db: str = "mcmod_qa"
+    chroma_collection: str = "mcmod_v1"
 
-    # Qdrant
-    qdrant_host: str = "127.0.0.1"
-    qdrant_port: int = 6333
-    qdrant_collection: str = "mcmod_v1"
-
-    # Storage mode — default to SQLite + ChromaDB (no Docker needed)
-    use_mysql: bool = False        # True = MySQL, False = SQLite
-    use_qdrant: bool = False       # True = Qdrant, False = ChromaDB
-    sqlite_path: str = "data/minemate.db"
-    chroma_path: str = "data/chroma"
+    sqlite_path: str = "minemate.db"
+    chroma_path: str = "chroma"
 
     # Embedding
     embedding_model: str = "BAAI/bge-m3"
@@ -46,16 +35,39 @@ class Settings(BaseSettings):
     top_k: int = 8
     similarity_threshold: float = 0.5
 
+    # Proxy pool — used by pipeline/proxy_crawl.py AND tools/web_search_mcmod.py (Playwright + proxy).
+    # Local IPs commonly get banned by mcmod after a crawl session; rotate via proxy.
+    proxy_api_url: str = ""
+    proxy_user: str = ""
+    proxy_pass: str = ""
+
+    # Playwright (Chromium) — used by web_search_mcmod for mcmod yxd_token JS bypass.
+    # If set, browser binaries go to this path (avoid C:\Users\...\AppData\Local\ms-playwright).
+    playwright_browsers_path: str = ""
+
     # App
     log_level: str = "INFO"
     log_dir: str = "data/logs"
 
     @property
-    def mysql_url(self) -> str:
-        return (
-            f"mysql+pymysql://{self.mysql_user}:{self.mysql_password}"
-            f"@{self.mysql_host}:{self.mysql_port}/{self.mysql_db}?charset=utf8mb4"
-        )
+    def resolved_sqlite_path(self) -> Path:
+        from config.paths import resolve_data_path
+        return resolve_data_path(self.sqlite_path, fallback_subdir="db")
+
+    @property
+    def resolved_chroma_path(self) -> Path:
+        from config.paths import resolve_data_path
+        return resolve_data_path(self.chroma_path, fallback_subdir="chroma")
+
+    @property
+    def resolved_conv_dir(self) -> Path:
+        from config.paths import resolve_data_path
+        return resolve_data_path(f"{self.data_dir}/conversations", fallback_subdir="conversations")
+
+    @property
+    def resolved_log_dir(self) -> Path:
+        from config.paths import resolve_data_path
+        return resolve_data_path(self.log_dir, fallback_subdir="logs")
 
 
 settings = Settings()

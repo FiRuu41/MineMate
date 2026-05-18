@@ -4,7 +4,6 @@ os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 import asyncio
 import json
 import time
-from pathlib import Path
 
 import gradio as gr
 
@@ -14,9 +13,10 @@ from agents.router import RouterAgent
 from agents.workflow import McmodWorkflow
 from app.chat_handler import ChatHandler
 from config.logging import setup_logging
+from config.settings import settings
 from kb.retriever import HybridRetriever
 
-CONV_DIR = Path("data/conversations")
+CONV_DIR = settings.resolved_conv_dir
 CONV_DIR.mkdir(parents=True, exist_ok=True)
 
 CSS = """

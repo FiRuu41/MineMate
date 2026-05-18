@@ -9,7 +9,7 @@ from config.logging import new_trace_id, setup_logging
 from llm.deepseek_client import DeepSeekClient
 from pipeline.storage.db import SessionLocal
 from pipeline.storage.models import Mod
-from pipeline.storage.mysql_writer import update_mod_tags
+from pipeline.storage.writer import update_mod_tags
 
 VALID_GENRES = ["科技", "魔法", "冒险", "建筑", "农业", "RPG", "恐怖", "探索", "战斗", "交通",
                 "存储", "装饰", "辅助", "优化", "生存", "奇幻", "科幻"]

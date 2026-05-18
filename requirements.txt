@@ -20,44 +20,54 @@ anyio==4.13.0
     #   httpx
     #   openai
     #   starlette
+    #   watchfiles
 attrs==26.1.0
-    # via aiohttp
+    # via
+    #   aiohttp
+    #   jsonschema
+    #   referencing
 babel==2.18.0
     # via courlan
 banks==2.4.2
     # via llama-index-core
+bcrypt==5.0.0
+    # via chromadb
 beautifulsoup4==4.14.3
     # via minemate (pyproject.toml)
 brotli==1.2.0
     # via gradio
+build==1.5.0
+    # via chromadb
 certifi==2026.4.22
     # via
     #   httpcore
     #   httpx
+    #   kubernetes
     #   requests
     #   trafilatura
-cffi==2.0.0
-    # via cryptography
 charset-normalizer==3.4.7
     # via
     #   htmldate
     #   requests
     #   trafilatura
+chromadb==1.5.9
+    # via minemate (pyproject.toml)
 click==8.4.0
     # via
+    #   minemate (pyproject.toml)
     #   nltk
     #   typer
     #   uvicorn
 colorama==0.4.6
     # via
+    #   build
     #   click
     #   griffecli
     #   loguru
     #   tqdm
+    #   uvicorn
 courlan==1.3.2
     # via trafilatura
-cryptography==48.0.0
-    # via minemate (pyproject.toml)
 dataclasses-json==0.6.7
     # via llama-index-core
 dateparser==1.4.0
@@ -71,6 +81,8 @@ dirtyjson==1.0.8
     # via llama-index-core
 distro==1.9.0
     # via openai
+durationpy==0.10
+    # via kubernetes
 fastapi==0.136.1
     # via gradio
 filelock==3.29.0
@@ -81,6 +93,8 @@ filetype==1.2.0
     # via
     #   banks
     #   llama-index-core
+flatbuffers==25.12.19
+    # via onnxruntime
 frozenlist==1.8.0
     # via
     #   aiohttp
@@ -91,6 +105,8 @@ fsspec==2026.4.0
     #   huggingface-hub
     #   llama-index-core
     #   torch
+googleapis-common-protos==1.75.0
+    # via opentelemetry-exporter-otlp-proto-grpc
 gradio==6.14.0
     # via minemate (pyproject.toml)
 gradio-client==2.5.0
@@ -98,7 +114,9 @@ gradio-client==2.5.0
     #   gradio
     #   hf-gradio
 greenlet==3.5.0
-    # via sqlalchemy
+    # via
+    #   playwright
+    #   sqlalchemy
 griffe==2.0.2
     # via banks
 griffecli==2.0.2
@@ -111,33 +129,31 @@ groovy==0.1.2
     # via gradio
 grpcio==1.80.0
     # via
-    #   llama-index-vector-stores-qdrant
-    #   qdrant-client
+    #   chromadb
+    #   opentelemetry-exporter-otlp-proto-grpc
 h11==0.16.0
     # via
     #   httpcore
     #   uvicorn
-h2==4.3.0
-    # via httpx
 hf-gradio==0.4.1
     # via gradio
 hf-xet==1.5.0
     # via huggingface-hub
-hpack==4.1.0
-    # via h2
 htmldate==1.9.4
     # via trafilatura
 httpcore==1.0.9
     # via httpx
+httptools==0.7.1
+    # via uvicorn
 httpx==0.28.1
     # via
     #   minemate (pyproject.toml)
+    #   chromadb
     #   gradio
     #   gradio-client
     #   huggingface-hub
     #   llama-index-core
     #   openai
-    #   qdrant-client
     #   safehttpx
 huggingface-hub==1.15.0
     # via
@@ -147,14 +163,16 @@ huggingface-hub==1.15.0
     #   sentence-transformers
     #   tokenizers
     #   transformers
-hyperframe==6.1.0
-    # via h2
 idna==3.15
     # via
     #   anyio
     #   httpx
     #   requests
     #   yarl
+importlib-metadata==8.7.1
+    # via opentelemetry-api
+importlib-resources==7.1.0
+    # via chromadb
 jinja2==3.1.6
     # via
     #   banks
@@ -166,19 +184,22 @@ joblib==1.5.3
     # via
     #   nltk
     #   scikit-learn
+jsonschema==4.26.0
+    # via chromadb
+jsonschema-specifications==2025.9.1
+    # via jsonschema
 justext==3.0.2
     # via trafilatura
+kubernetes==35.0.0
+    # via chromadb
 llama-index-core==0.14.22
     # via
     #   minemate (pyproject.toml)
     #   llama-index-embeddings-huggingface
-    #   llama-index-vector-stores-qdrant
 llama-index-embeddings-huggingface==0.7.0
     # via minemate (pyproject.toml)
 llama-index-instrumentation==0.5.0
     # via llama-index-workflows
-llama-index-vector-stores-qdrant==0.10.1
-    # via minemate (pyproject.toml)
 llama-index-workflows==2.20.0
     # via llama-index-core
 loguru==0.7.3
@@ -202,6 +223,8 @@ marshmallow==3.26.2
     # via dataclasses-json
 mdurl==0.1.2
     # via markdown-it-py
+mmh3==5.2.1
+    # via chromadb
 mpmath==1.3.0
     # via sympy
 multidict==6.7.1
@@ -220,24 +243,55 @@ nltk==3.9.4
     # via llama-index-core
 numpy==2.4.5
     # via
+    #   chromadb
     #   gradio
     #   llama-index-core
+    #   onnxruntime
     #   pandas
-    #   qdrant-client
     #   scikit-learn
     #   scipy
     #   sentence-transformers
     #   transformers
+oauthlib==3.3.1
+    # via requests-oauthlib
+onnxruntime==1.26.0
+    # via chromadb
 openai==2.37.0
     # via minemate (pyproject.toml)
+opentelemetry-api==1.41.1
+    # via
+    #   chromadb
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+opentelemetry-exporter-otlp-proto-common==1.41.1
+    # via opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-exporter-otlp-proto-grpc==1.41.1
+    # via chromadb
+opentelemetry-proto==1.41.1
+    # via
+    #   opentelemetry-exporter-otlp-proto-common
+    #   opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-sdk==1.41.1
+    # via
+    #   chromadb
+    #   opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-semantic-conventions==0.62b1
+    # via opentelemetry-sdk
 orjson==3.11.9
-    # via gradio
+    # via
+    #   chromadb
+    #   gradio
+overrides==7.7.0
+    # via chromadb
 packaging==26.2
     # via
+    #   build
     #   gradio
     #   gradio-client
     #   huggingface-hub
     #   marshmallow
+    #   onnxruntime
     #   transformers
 pandas==3.0.3
     # via gradio
@@ -249,19 +303,23 @@ platformdirs==4.9.6
     # via
     #   banks
     #   llama-index-core
-portalocker==3.2.0
-    # via qdrant-client
+playwright==1.59.0
+    # via minemate (pyproject.toml)
 propcache==0.5.2
     # via
     #   aiohttp
     #   yarl
-protobuf==7.34.1
-    # via qdrant-client
-pycparser==3.0
-    # via cffi
+protobuf==6.33.6
+    # via
+    #   googleapis-common-protos
+    #   onnxruntime
+    #   opentelemetry-proto
+pybase64==1.4.3
+    # via chromadb
 pydantic==2.13.4
     # via
     #   banks
+    #   chromadb
     #   fastapi
     #   gradio
     #   llama-index-core
@@ -269,42 +327,51 @@ pydantic==2.13.4
     #   llama-index-workflows
     #   openai
     #   pydantic-settings
-    #   qdrant-client
 pydantic-core==2.46.4
     # via pydantic
 pydantic-settings==2.14.1
-    # via minemate (pyproject.toml)
+    # via
+    #   minemate (pyproject.toml)
+    #   chromadb
 pydub==0.25.1
     # via gradio
+pyee==13.0.1
+    # via playwright
 pygments==2.20.0
     # via rich
-pymysql==1.1.3
-    # via minemate (pyproject.toml)
+pypika==0.51.1
+    # via chromadb
+pyproject-hooks==1.2.0
+    # via build
 python-dateutil==2.9.0.post0
     # via
     #   dateparser
     #   htmldate
+    #   kubernetes
     #   pandas
 python-dotenv==1.2.2
-    # via pydantic-settings
+    # via
+    #   pydantic-settings
+    #   uvicorn
 python-multipart==0.0.28
     # via gradio
 pytz==2026.2
     # via
     #   dateparser
     #   gradio
-pywin32==311
-    # via portalocker
 pyyaml==6.0.3
     # via
+    #   chromadb
     #   gradio
     #   huggingface-hub
+    #   kubernetes
     #   llama-index-core
     #   transformers
-qdrant-client==1.18.0
+    #   uvicorn
+referencing==0.37.0
     # via
-    #   minemate (pyproject.toml)
-    #   llama-index-vector-stores-qdrant
+    #   jsonschema
+    #   jsonschema-specifications
 regex==2026.5.9
     # via
     #   dateparser
@@ -313,10 +380,20 @@ regex==2026.5.9
     #   transformers
 requests==2.34.2
     # via
+    #   kubernetes
     #   llama-index-core
+    #   requests-oauthlib
     #   tiktoken
+requests-oauthlib==2.0.0
+    # via kubernetes
 rich==15.0.0
-    # via typer
+    # via
+    #   chromadb
+    #   typer
+rpds-py==0.30.0
+    # via
+    #   jsonschema
+    #   referencing
 safehttpx==0.1.7
     # via gradio
 safetensors==0.7.0
@@ -338,7 +415,9 @@ setuptools==82.0.1
 shellingham==1.5.4
     # via typer
 six==1.17.0
-    # via python-dateutil
+    # via
+    #   kubernetes
+    #   python-dateutil
 sniffio==1.3.1
     # via openai
 soupsieve==2.8.3
@@ -356,6 +435,7 @@ sympy==1.14.0
 tenacity==9.1.4
     # via
     #   minemate (pyproject.toml)
+    #   chromadb
     #   llama-index-core
 threadpoolctl==3.6.0
     # via scikit-learn
@@ -366,13 +446,16 @@ tinytag==2.2.1
 tld==0.13.2
     # via courlan
 tokenizers==0.22.2
-    # via transformers
+    # via
+    #   chromadb
+    #   transformers
 tomlkit==0.14.0
     # via gradio
 torch==2.10.0
     # via sentence-transformers
 tqdm==4.67.3
     # via
+    #   chromadb
     #   huggingface-hub
     #   llama-index-core
     #   nltk
@@ -385,6 +468,7 @@ transformers==5.8.1
     # via sentence-transformers
 typer==0.25.1
     # via
+    #   chromadb
     #   gradio
     #   hf-gradio
     #   huggingface-hub
@@ -394,6 +478,7 @@ typing-extensions==4.15.0
     #   aiosignal
     #   anyio
     #   beautifulsoup4
+    #   chromadb
     #   fastapi
     #   gradio
     #   gradio-client
@@ -402,8 +487,14 @@ typing-extensions==4.15.0
     #   llama-index-core
     #   llama-index-workflows
     #   openai
+    #   opentelemetry-api
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
     #   pydantic
     #   pydantic-core
+    #   pyee
+    #   referencing
     #   sentence-transformers
     #   sqlalchemy
     #   starlette
@@ -429,11 +520,19 @@ urllib3==2.7.0
     # via
     #   courlan
     #   htmldate
-    #   qdrant-client
+    #   kubernetes
     #   requests
     #   trafilatura
 uvicorn==0.47.0
-    # via gradio
+    # via
+    #   chromadb
+    #   gradio
+watchfiles==1.1.1
+    # via uvicorn
+websocket-client==1.9.0
+    # via kubernetes
+websockets==16.0
+    # via uvicorn
 win32-setctime==1.2.0
     # via loguru
 wrapt==2.1.2
@@ -442,3 +541,5 @@ wrapt==2.1.2
     #   llama-index-core
 yarl==1.23.0
     # via aiohttp
+zipp==3.23.1
+    # via importlib-metadata

@@ -8,7 +8,7 @@ from config.logging import new_trace_id, setup_logging
 from llm.deepseek_client import DeepSeekClient
 from pipeline.storage.db import SessionLocal
 from pipeline.storage.models import Mod
-from pipeline.storage.mysql_writer import update_mod_integrations
+from pipeline.storage.writer import update_mod_integrations
 
 EXTRACT_PROMPT = """你是一个 Minecraft 模组专家。请从以下模组描述中，提取该模组明确提到的"兼容/联动/依赖/支持"的其他模组。
 
