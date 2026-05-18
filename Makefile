@@ -1,4 +1,4 @@
-.PHONY: init build-index build-tags run test lint format tag extract-integrations up down
+.PHONY: init build-index build-tags run test lint format tag extract-integrations
 
 init:
 	uv run python -m scripts.init_db
@@ -26,9 +26,3 @@ tag:
 
 extract-integrations:
 	uv run python -m pipeline.extract_integrations
-
-up:
-	docker-compose up -d
-
-down:
-	docker-compose down

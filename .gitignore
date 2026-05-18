@@ -20,3 +20,10 @@ data/export/
 data/chroma/
 data/export/
 data/conversations/
+
+# Phase 0: crawler & migration scripts — kept local only
+pipeline/proxy_crawl.py
+scripts/_remigrate.py
+
+# Phase 0: dev-only scripts for personal data packaging
+scripts/dev/

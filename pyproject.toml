@@ -6,13 +6,9 @@ readme = "README.md"
 requires-python = ">=3.11,<3.13"
 dependencies = [
   "llama-index-core>=0.11.0",
-  "llama-index-vector-stores-qdrant>=0.3.0",
   "llama-index-embeddings-huggingface>=0.3.0",
-  "qdrant-client>=1.11.0",
   "sentence-transformers>=3.0.0",
   "sqlalchemy>=2.0",
-  "pymysql>=1.1.0",
-  "cryptography>=42.0",
   "httpx>=0.27",
   "beautifulsoup4>=4.12",
   "lxml>=5.0",
