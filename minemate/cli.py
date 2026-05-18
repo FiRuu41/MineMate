@@ -251,5 +251,20 @@ def build_tags_cmd(workers, limit, yes):
         sys.argv = saved_argv
 
 
+@main.command(name="install-chromium")
+def install_chromium_cmd():
+    """Install Playwright Chromium browser (~130 MB) for mcmod web fallback."""
+    import sys
+    from playwright.__main__ import main as _pw_main
+    click.echo("正在安装 Chromium 浏览器（约 130 MB）...")
+    saved = sys.argv
+    sys.argv = ["playwright", "install", "chromium"]
+    try:
+        _pw_main()
+        click.echo(click.style("Chromium 安装完成。", fg="green"))
+    finally:
+        sys.argv = saved
+
+
 if __name__ == "__main__":
     main()

@@ -146,3 +146,22 @@ def test_setup_reports_4_stages(monkeypatch):
     assert "[3/4]" in result.output
     assert "[4/4]" in result.output
     assert "Setup Wizard" in result.output
+
+
+def test_install_chromium_invokes_playwright(monkeypatch):
+    """install-chromium should call playwright.__main__.main with ['install', 'chromium']."""
+    import sys
+    from click.testing import CliRunner
+
+    captured_argv = []
+
+    def fake_pw_main():
+        captured_argv.append(list(sys.argv))
+
+    monkeypatch.setattr("playwright.__main__.main", fake_pw_main)
+
+    runner = CliRunner()
+    result = runner.invoke(main, ["install-chromium"])
+    assert result.exit_code == 0
+    assert "Chromium 安装完成" in result.output
+    assert captured_argv == [["playwright", "install", "chromium"]]
