@@ -4,9 +4,11 @@ os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 
 import json
 import time
+import traceback
 
 import gradio as gr
 import random
+from loguru import logger
 
 from agents.answerer import AnswererAgent
 from agents.critic import CriticAgent
@@ -90,6 +92,18 @@ THINKING_PLACEHOLDERS = [
 ]
 
 
+def _classify_error(exc: Exception) -> str:
+    """Map exception to user-friendly Chinese message."""
+    err_str = (str(exc) or "").lower()
+    if "deepseek" in err_str or "openai" in err_str or "api" in err_str:
+        return "🚧 LLM 服务暂时不可达，请稍后重试或检查 API key 配置。"
+    if "connection" in err_str or "timeout" in err_str or "network" in err_str:
+        return "🌐 网络异常，请检查连接后重试。"
+    if "mcmod" in err_str:
+        return "🕷️ mcmod.cn 暂时无法访问（可能反爬或网络问题），稍后再试。"
+    return f"⚠️ 发生未知错误：{type(exc).__name__}。详情见调试折叠。"
+
+
 def build_handler() -> ChatHandler:
     workflow = McmodWorkflow(
         router=RouterAgent(),
@@ -153,9 +167,15 @@ def main() -> None:
         history.append({"role": "assistant", "content": placeholder})
         yield "", history, "", conv_id, gr.skip()
 
-        # Phase 2: do the actual work + yield real answer
-        answer, debug = await handler.chat(message)
-        history[-1] = {"role": "assistant", "content": answer}
+        # Phase 2: do the actual work, with error handling
+        try:
+            answer, debug = await handler.chat(message)
+            history[-1] = {"role": "assistant", "content": answer}
+        except Exception as e:
+            user_msg = _classify_error(e)
+            history[-1] = {"role": "assistant", "content": user_msg}
+            debug = f"ERROR: {type(e).__name__}\n{traceback.format_exc()}"
+            logger.exception("respond failed")
 
         title = history[0]["content"][:40] if history else "新对话"
         _save_conv(conv_id, history, title)

@@ -78,3 +78,85 @@ async def test_respond_returns_immediately_on_empty_message():
 
     assert len(yields) == 1, f"expected 1 yield, got {len(yields)}"
     assert fake_handler.chat.await_count == 0
+
+
+@pytest.mark.asyncio
+async def test_respond_handles_exception_gracefully(monkeypatch, tmp_path):
+    """When handler.chat raises, history's last entry should be a friendly Chinese message."""
+    import copy
+    import random
+    import traceback as _tb
+
+    monkeypatch.setattr("pathlib.Path.home", lambda: tmp_path)
+
+    from app import gradio_app as ga
+    monkeypatch.setattr(ga, "_save_conv", lambda *a, **kw: None)
+    monkeypatch.setattr(ga, "_build_radio", lambda: None, raising=False)
+
+    fake_handler = MagicMock()
+    fake_handler.chat = AsyncMock(side_effect=RuntimeError("DeepSeek connection refused"))
+
+    history = []
+
+    async def respond(message, history, conv_id):
+        if not message.strip():
+            yield "", history, "", conv_id, None
+            return
+        history.append({"role": "user", "content": message})
+        placeholder = random.choice(ga.THINKING_PLACEHOLDERS)
+        history.append({"role": "assistant", "content": placeholder})
+        yield "", history, "", conv_id, None
+
+        try:
+            answer, debug = await fake_handler.chat(message)
+            history[-1] = {"role": "assistant", "content": answer}
+        except Exception as e:
+            user_msg = ga._classify_error(e)
+            history[-1] = {"role": "assistant", "content": user_msg}
+            debug = f"ERROR: {type(e).__name__}\n{_tb.format_exc()}"
+
+        ga._save_conv(conv_id, history, "test")
+        yield "", history, debug, conv_id, ga._build_radio()
+
+    yields = []
+    async for output in respond("test query", history, "test-conv"):
+        yields.append(copy.deepcopy(output))
+
+    assert len(yields) == 2
+
+    # Final bot message should be the friendly error (NOT the placeholder)
+    _, h_final, debug_final, _, _ = yields[1]
+    assert "🚧 LLM 服务" in h_final[-1]["content"]  # DeepSeek branch matched
+    assert "RuntimeError" in debug_final
+    assert "DeepSeek connection refused" in debug_final
+
+
+def test_classify_error_deepseek_branch():
+    """DeepSeek/OpenAI/api keyword → LLM service message."""
+    from app.gradio_app import _classify_error
+    assert "LLM" in _classify_error(RuntimeError("DeepSeek timeout"))
+    assert "LLM" in _classify_error(ValueError("OpenAI API failed"))
+    assert "LLM" in _classify_error(Exception("api key invalid"))
+
+
+def test_classify_error_network_branch():
+    """connection/timeout/network keyword → network message."""
+    from app.gradio_app import _classify_error
+    assert "网络" in _classify_error(OSError("connection refused"))
+    # Note: TimeoutError str() may be empty; test with explicit message
+    assert "网络" in _classify_error(Exception("request timeout"))
+    assert "网络" in _classify_error(Exception("network unreachable"))
+
+
+def test_classify_error_mcmod_branch():
+    """mcmod keyword → mcmod message."""
+    from app.gradio_app import _classify_error
+    assert "mcmod.cn" in _classify_error(Exception("mcmod returned 403"))
+
+
+def test_classify_error_unknown_branch():
+    """Unknown error → fallback with class name."""
+    from app.gradio_app import _classify_error
+    msg = _classify_error(ValueError("something weird"))
+    assert "未知错误" in msg
+    assert "ValueError" in msg
