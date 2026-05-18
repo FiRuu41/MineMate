@@ -46,6 +46,11 @@ class Settings(BaseSettings):
     top_k: int = 8
     similarity_threshold: float = 0.5
 
+    # Proxy pool (optional — for mcmod scraping when IP is banned)
+    proxy_api_url: str = ""
+    proxy_user: str = ""
+    proxy_pass: str = ""
+
     # App
     log_level: str = "INFO"
     log_dir: str = "data/logs"

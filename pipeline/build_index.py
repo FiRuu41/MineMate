@@ -16,6 +16,12 @@ from pipeline.storage.qdrant_writer import QdrantWriter
 from pipeline.structure import intro_to_chunks
 
 
+def _sanitize_meta(meta: dict) -> dict:
+    """Convert None/nested values to ChromaDB-compatible scalars."""
+    return {k: ("" if v is None else str(v) if isinstance(v, (list, dict)) else v)
+            for k, v in meta.items()}
+
+
 def build_for_mod(mod: Mod, writer_or_collection, embedder) -> int:
     if not mod.description:
         logger.warning("[{}] empty description, skip", mod.mod_id)
@@ -45,7 +51,7 @@ def build_for_mod(mod: Mod, writer_or_collection, embedder) -> int:
             pass
         ids = [f"{mod.mod_id}_{i}" for i in range(len(chunks))]
         docs = [c.text for c in chunks]
-        metas = [c.metadata.model_dump() for c in chunks]
+        metas = [_sanitize_meta(c.metadata.model_dump()) for c in chunks]
         col.add(ids=ids, embeddings=vectors, documents=docs, metadatas=metas)
 
     logger.info("[{}] indexed {} chunks", mod.mod_id, len(chunks))

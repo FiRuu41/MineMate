@@ -22,12 +22,10 @@ UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0"
 TOKEN_RE = re.compile(r"yxd_token=([a-f0-9]+)")
 PROGRESS_FILE = Path("data/proxy_crawl_progress.json")
 
-PROXY_API = ("https://dps.kdlapi.com/api/getdps/"
-             "?secret_id=oaoslyfdfto82bsa6ks0"
-             "&signature=wjjgi4ikqjol7fwwglml7y76ttpvq0v8"
-             "&num=5&format=json&sep=1")
-PROXY_USER = "d2645551915"
-PROXY_PASS = "vby8n2ny"
+from config.settings import settings as _cfg
+PROXY_API = _cfg.proxy_api_url
+PROXY_USER = _cfg.proxy_user
+PROXY_PASS = _cfg.proxy_pass
 
 IP_REUSE = 25  # requests per IP before rotating
 SEM = asyncio.Semaphore(8)  # concurrent workers, each with own IP

@@ -62,8 +62,6 @@ def _find_by_tags(session, themes, mc_version, loader, limit):
     from sqlalchemy import text
 
     q = session.query(Mod).filter(Mod.tags.isnot(None), Mod.description.isnot(None))
-    if mc_version:
-        q = q.filter(text("JSON_CONTAINS(mc_versions, :ver)")).params(ver=f'"{mc_version}"')
     if loader:
         q = q.filter(Mod.loader.contains(loader))
 
@@ -71,6 +69,8 @@ def _find_by_tags(session, themes, mc_version, loader, limit):
     scored = []
     for m in rows:
         if not m.tags:
+            continue
+        if mc_version and mc_version not in (m.mc_versions or []):
             continue
         genres = m.tags.get("genres", [])
         score = sum(1 for t in themes if t in genres)
