@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "minemate"
-version = "0.1.1"
+version = "0.1.3"
 description = "Your AI buddy for Minecraft mods — RAG + Multi-Agent Q&A based on mcmod.cn"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
@@ -81,6 +81,13 @@ packages = [
   "llm",
   "pipeline",
   "tools",
+  "scripts",
+]
+exclude = [
+  "scripts/dev/**",
+  "scripts/_remigrate.py",
+  "**/__pycache__",
+  "**/*.pyc",
 ]
 
 [tool.hatch.build.targets.sdist]

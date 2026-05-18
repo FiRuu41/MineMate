@@ -66,6 +66,8 @@ minemate start    # 启动 Web UI -> http://127.0.0.1:7860
 数据默认存到 `~/.minemate/`（可通过环境变量 `MINEMATE_HOME=/your/path` 自定义）。
 API key 默认写到 `~/.minemate/.env`，从任何目录跑 minemate 都能读到。
 
+⚠️ **BGE-M3 模型位置**：首次 `minemate start` 会自动下载 BGE-M3（~2.3 GB），**默认下到 C 盘** `~/.cache/huggingface/`。Windows 用户如想下到 D 盘，先在 `~/.minemate/.env` 加一行 `HF_HOME=D:/hf_cache` 再启动。
+
 适合：只想用 MineMate、不打算改代码的朋友。
 
 ### 1. 从源码安装（开发者）

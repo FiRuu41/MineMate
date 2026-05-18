@@ -144,7 +144,10 @@ def setup():
         click.echo(click.style("OK", fg="green"))
     else:
         click.echo(click.style("MISSING", fg="yellow"))
-        issues.append("BGE-M3 模型：首次 minemate start 时自动下载（约 2.3 GB）")
+        issues.append(
+            "BGE-M3 模型：首次 minemate start 时自动下载（约 2.3 GB，默认到 C 盘 "
+            "~/.cache/huggingface/）。如想下到 D 盘：在 ~/.minemate/.env 加 HF_HOME=D:/hf_cache"
+        )
 
     click.echo()
     if not issues:

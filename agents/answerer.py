@@ -3,7 +3,7 @@ from pathlib import Path
 from kb.schemas import Chunk
 from llm.deepseek_client import DeepSeekClient
 
-PROMPT_PATH = Path("config/prompts/answerer.txt")
+PROMPT_PATH = Path(__file__).resolve().parent.parent / "config" / "prompts" / "answerer.txt"
 
 
 class AnswererAgent:

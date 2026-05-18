@@ -4,7 +4,7 @@ from loguru import logger
 
 from llm.deepseek_client import DeepSeekClient
 
-PROMPT_PATH = Path("config/prompts/router.txt")
+PROMPT_PATH = Path(__file__).resolve().parent.parent / "config" / "prompts" / "router.txt"
 VALID_INTENTS = {
     "kb_query", "chitchat", "recommendation", "compatibility",
     "mod_info_query", "web_fallback", "latest_mods", "modpack_curation",

@@ -5,7 +5,7 @@ from loguru import logger
 
 from llm.deepseek_client import DeepSeekClient
 
-PROMPT_PATH = Path("config/prompts/critic.txt")
+PROMPT_PATH = Path(__file__).resolve().parent.parent / "config" / "prompts" / "critic.txt"
 
 
 class CriticAgent:
