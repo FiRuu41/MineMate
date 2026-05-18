@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 from pipeline.storage.db import Base
 from pipeline.storage.models import Mod
-from pipeline.storage.mysql_writer import upsert_mod
+from pipeline.storage.writer import upsert_mod
 
 
 @pytest.fixture

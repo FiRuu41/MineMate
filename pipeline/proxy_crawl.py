@@ -16,7 +16,7 @@ from loguru import logger
 
 from config.logging import new_trace_id, setup_logging
 from pipeline.storage.db import SessionLocal
-from pipeline.storage.mysql_writer import upsert_mod
+from pipeline.storage.writer import upsert_mod
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0"
 TOKEN_RE = re.compile(r"yxd_token=([a-f0-9]+)")
