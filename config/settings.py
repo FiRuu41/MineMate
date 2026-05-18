@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     chroma_collection: str = "mcmod_v1"
 
-    sqlite_path: str = "minemate.db"
+    sqlite_path: str = "db/minemate.db"
     chroma_path: str = "chroma"
 
     # Embedding
@@ -47,27 +47,27 @@ class Settings(BaseSettings):
 
     # App
     log_level: str = "INFO"
-    log_dir: str = "data/logs"
+    log_dir: str = "logs"
 
     @property
     def resolved_sqlite_path(self) -> Path:
         from config.paths import resolve_data_path
-        return resolve_data_path(self.sqlite_path, fallback_subdir="db")
+        return resolve_data_path(self.sqlite_path)
 
     @property
     def resolved_chroma_path(self) -> Path:
         from config.paths import resolve_data_path
-        return resolve_data_path(self.chroma_path, fallback_subdir="chroma")
+        return resolve_data_path(self.chroma_path)
 
     @property
     def resolved_conv_dir(self) -> Path:
         from config.paths import resolve_data_path
-        return resolve_data_path(f"{self.data_dir}/conversations", fallback_subdir="conversations")
+        return resolve_data_path(f"{self.data_dir}/conversations")
 
     @property
     def resolved_log_dir(self) -> Path:
         from config.paths import resolve_data_path
-        return resolve_data_path(self.log_dir, fallback_subdir="logs")
+        return resolve_data_path(self.log_dir)
 
 
 settings = Settings()
