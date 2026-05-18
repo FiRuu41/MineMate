@@ -1,42 +1,21 @@
 """Real-time mcmod search + page fetch.
 
-Direct connection by default. Set PROXY_API_URL / PROXY_USER / PROXY_PASS
-in .env to enable proxy pool fallback when direct is blocked.
+Direct connection only — proxy fallback removed in Phase 0.
+Use pipeline/proxy_crawl.py for bulk crawling with proxy support.
 """
-import random
 import re
 import time
 
 import httpx
-import requests
 from bs4 import BeautifulSoup
 from loguru import logger
 
-from config.settings import settings
-
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0"
 TOKEN_RE = re.compile(r"yxd_token['\"]?\s*[=:']\s*['\"]?([a-f0-9]+)", re.I)
-_proxy_ips: list[str] = []
-
-
-def _get_proxy() -> str | None:
-    """Get one proxy IP from API, or None if not configured."""
-    global _proxy_ips
-    if not settings.proxy_api_url:
-        return None
-    if not _proxy_ips:
-        try:
-            r = requests.get(settings.proxy_api_url, timeout=10)
-            _proxy_ips = r.json().get("data", {}).get("proxy_list", [])
-            logger.debug("Fetched {} proxies", len(_proxy_ips))
-        except Exception as e:
-            logger.warning("Proxy API failed: {}", e)
-            return None
-    return _proxy_ips.pop() if _proxy_ips else None
 
 
 def _try_fetch(url: str) -> str | None:
-    """Direct HTTP fetch."""
+    """Direct HTTP fetch with yxd_token cookie bypass."""
     try:
         with httpx.Client(timeout=20, follow_redirects=False) as c:
             r1 = c.get(url, headers={"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9"})
@@ -54,38 +33,9 @@ def _try_fetch(url: str) -> str | None:
         return None
 
 
-def _try_fetch_proxy(url: str, ip: str) -> str | None:
-    """Fetch via proxy IP."""
-    proxy_url = f"http://{settings.proxy_user}:{settings.proxy_pass}@{ip}"
-    try:
-        with httpx.Client(proxy=proxy_url, timeout=25, follow_redirects=False) as c:
-            r1 = c.get(url, headers={"User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9"})
-            m = TOKEN_RE.search(r1.text)
-            if m and len(r1.text) < 500:
-                c.cookies.set("yxd_token", m.group(1), domain=".mcmod.cn", path="/")
-            c.get(url, headers={"User-Agent": UA, "Accept-Language": "zh-CN"})
-            time.sleep(0.3)
-            r3 = c.get(url, headers={"User-Agent": UA, "Accept-Language": "zh-CN"})
-            if len(r3.text) < 500 or "yxd_token" in r3.text:
-                time.sleep(0.3)
-                r3 = c.get(url, headers={"User-Agent": UA, "Referer": "https://www.mcmod.cn/"})
-            return r3.text if len(r3.text) > 500 else None
-    except Exception:
-        return None
-
-
 def fetch_page(url: str) -> str | None:
-    """Fetch a page — direct first, proxy fallback."""
-    # Try direct
-    html = _try_fetch(url)
-    if html:
-        return html
-    # Try proxy
-    ip = _get_proxy()
-    if ip:
-        logger.info("Direct failed, trying proxy {}", ip)
-        return _try_fetch_proxy(url, ip)
-    return None
+    """Fetch a page via direct connection only."""
+    return _try_fetch(url)
 
 
 def parse_page_intro(html: str) -> str:
