@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,7 +21,8 @@ class Settings(BaseSettings):
     # Qdrant
     qdrant_host: str = "127.0.0.1"
     qdrant_port: int = 6333
-    qdrant_collection: str = "mcmod_v1"
+    qdrant_collection: str = "mcmod_v1"  # 旧名，等同 chroma_collection（C8 删除）
+    chroma_collection: str = "mcmod_v1"
 
     # Storage mode — default to SQLite + ChromaDB (no Docker needed)
     use_mysql: bool = False        # True = MySQL, False = SQLite
@@ -61,6 +64,26 @@ class Settings(BaseSettings):
             f"mysql+pymysql://{self.mysql_user}:{self.mysql_password}"
             f"@{self.mysql_host}:{self.mysql_port}/{self.mysql_db}?charset=utf8mb4"
         )
+
+    @property
+    def resolved_sqlite_path(self) -> Path:
+        from config.paths import resolve_data_path
+        return resolve_data_path(self.sqlite_path, fallback_subdir="db")
+
+    @property
+    def resolved_chroma_path(self) -> Path:
+        from config.paths import resolve_data_path
+        return resolve_data_path(self.chroma_path, fallback_subdir="chroma")
+
+    @property
+    def resolved_conv_dir(self) -> Path:
+        from config.paths import resolve_data_path
+        return resolve_data_path(f"{self.data_dir}/conversations", fallback_subdir="conversations")
+
+    @property
+    def resolved_log_dir(self) -> Path:
+        from config.paths import resolve_data_path
+        return resolve_data_path(self.log_dir, fallback_subdir="logs")
 
 
 settings = Settings()
